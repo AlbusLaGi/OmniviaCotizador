@@ -1,0 +1,7 @@
+{% extends 'confirm_delete_base.html' %}
+
+{% block title %}Confirmar Eliminación de Servicio de Restaurante{% endblock %}
+
+{% block object_type %}servicio de restaurante{% endblock %}
+
+{% block delete_message %}¿Está seguro de que desea eliminar el servicio de restaurante "<strong>{{ object.name }}</strong>"?{% endblock %}

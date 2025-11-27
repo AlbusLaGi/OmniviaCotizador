@@ -1,0 +1,7 @@
+{% extends 'confirm_delete_base.html' %}
+
+{% block title %}Confirmar Eliminación de Transporte{% endblock %}
+
+{% block object_type %}transporte{% endblock %}
+
+{% block delete_message %}¿Está seguro de que desea eliminar el transporte "<strong>{{ object.tipoTransporte }} - {{ object.nombre }}</strong>"?{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'form_base.html' %}
+{% load static %}
+
+{% block form_title %}{% if object %}Editar Ruta de Transporte{% else %}Crear Nueva Ruta de Transporte{% endif %}{% endblock %}
+
+{% block form_heading %}{% if object %}Editar Ruta de Transporte{% else %}Crear Nueva Ruta de Transporte{% endif %}{% endblock %}
+
+{% block delete_url %}{% if object %}{% url 'ruta-transporte-delete' pk=object.pk %}{% endif %}{% endblock %}
+
+{% block object_type %}ruta de transporte{% endblock %}
+
+{% block form_fields %}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="{{ form.convenio_agencia.id_for_label }}" class="form-label">Convenio con Agencia:</label>
+            {{ form.convenio_agencia }}
+            {% if form.convenio_agencia.help_text %}
+                <div class="form-text">{{ form.convenio_agencia.help_text }}</div>
+            {% endif %}
+            {% for error in form.convenio_agencia.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-6">
+            <label for="{{ form.transporte.id_for_label }}" class="form-label">Vehículo/Transporte:</label>
+            {{ form.transporte }}
+            {% if form.transporte.help_text %}
+                <div class="form-text">{{ form.transporte.help_text }}</div>
+            {% endif %}
+            {% for error in form.transporte.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Mostrar ciudad de origen cuando se selecciona un convenio -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div id="ciudad-origen-info" class="alert alert-info" style="display: none;">
+                <strong>Ciudad de Origen:</strong> <span id="origen-text"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="{{ form.destino.id_for_label }}" class="form-label">Destino (Opcional):</label>
+            {{ form.destino }}
+            {% if form.destino.help_text %}
+                <div class="form-text">{{ form.destino.help_text }}</div>
+            {% endif %}
+            {% for error in form.destino.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-6">
+            <label for="{{ form.paquete.id_for_label }}" class="form-label">Paquete (Opcional):</label>
+            {{ form.paquete }}
+            {% if form.paquete.help_text %}
+                <div class="form-text">{{ form.paquete.help_text }}</div>
+            {% endif %}
+            {% for error in form.paquete.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="{{ form.precio_alta.id_for_label }}" class="form-label">Precio Temporada Alta:</label>
+            {{ form.precio_alta }}
+            {% if form.precio_alta.help_text %}
+                <div class="form-text">{{ form.precio_alta.help_text }}</div>
+            {% endif %}
+            {% for error in form.precio_alta.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-4">
+            <label for="{{ form.precio_media.id_for_label }}" class="form-label">Precio Temporada Media:</label>
+            {{ form.precio_media }}
+            {% if form.precio_media.help_text %}
+                <div class="form-text">{{ form.precio_media.help_text }}</div>
+            {% endif %}
+            {% for error in form.precio_media.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-4">
+            <label for="{{ form.precio_baja.id_for_label }}" class="form-label">Precio Temporada Baja:</label>
+            {{ form.precio_baja }}
+            {% if form.precio_baja.help_text %}
+                <div class="form-text">{{ form.precio_baja.help_text }}</div>
+            {% endif %}
+            {% for error in form.precio_baja.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <p><strong>Importante para Transportadoras:</strong> Las tarifas deben ser plenas sin descuento, ya que el descuento es manejado por la agencia según el acuerdo realizado con ellos.</p>
+    </div>
+
+    <div class="alert alert-info">
+        <p><strong>Nota:</strong> Seleccione un destino O un paquete (no ambos). Si se selecciona ambos, se priorizará el destino.</p>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+        // Actualizar destinos, paquetes y ciudad de origen cuando se cambie algún convenio
+        function updateDestinationsAndPackages() {
+            const convenioAgenciaId = document.getElementById('id_convenio_agencia') ? document.getElementById('id_convenio_agencia').value : null;
+
+            // Ocultar información de ciudad de origen inicialmente
+            document.getElementById('ciudad-origen-info').style.display = 'none';
+
+            if (convenioAgenciaId) {
+                // Buscar la opción seleccionada para obtener la ciudad de origen
+                const selectedOption = document.querySelector(`#id_convenio_agencia option[value="${convenioAgenciaId}"]`);
+                if (selectedOption) {
+                    // En este caso, necesitamos manejarlo de otra manera ya que la ciudad de origen no está en las opciones
+                    // Vamos a usar una lista de convenios con sus ciudades de origen pre-cargada
+                    updateCiudadOrigen(convenioAgenciaId);
+                }
+            }
+        }
+
+        // Función para actualizar la ciudad de origen
+        function updateCiudadOrigen(convenioAgenciaId) {
+            // Obtener datos de las ciudades de origen desde el contexto de la plantilla (puede ser pre-cargado)
+            // Por ahora, vamos a usar un enfoque de AJAX para obtener la información
+            if (convenioAgenciaId) {
+                fetch(`/api/convenio-agencia/${convenioAgenciaId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.ciudad_origen) {
+                            document.getElementById('origen-text').textContent = data.ciudad_origen;
+                            document.getElementById('ciudad-origen-info').style.display = 'block';
+                        } else {
+                            document.getElementById('ciudad-origen-info').style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error obteniendo ciudad de origen:', error);
+                        document.getElementById('ciudad-origen-info').style.display = 'none';
+                    });
+            } else {
+                document.getElementById('ciudad-origen-info').style.display = 'none';
+            }
+        }
+
+        // Escuchar cambios en el campo de convenio de agencia
+        const convenioAgenciaSelect = document.getElementById('id_convenio_agencia');
+
+        if (convenioAgenciaSelect) {
+            convenioAgenciaSelect.addEventListener('change', updateDestinationsAndPackages);
+
+            // Mostrar ciudad de origen si ya hay un convenio seleccionado (en edición)
+            if (convenioAgenciaSelect.value) {
+                updateDestinationsAndPackages();
+            }
+        }
+    </script>
+{% endblock %}

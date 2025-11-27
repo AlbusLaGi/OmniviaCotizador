@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Actualizar Perfil{% endblock %}
+
+{% block content %}
+<div class="container mt-4 profile-container">
+    <div class="profile-card glass-effect">
+        <h1 class="text-center">Mi Perfil</h1>
+        <p class="text-center">Aquí puedes ver y gestionar la información de tu empresa.</p>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                Información de {{ entidad.tipo_entidad }}
+            </div>
+            <div class="card-body">
+                {% if entidad.logo %}
+                    <div class="mb-3 text-center">
+                        <strong>Logo:</strong><br>
+                        <img src="{{ entidad.logo.url }}" alt="Logo de la empresa" style="max-height: 100px;">
+                    </div>
+                {% endif %}
+                <div class="mb-3">
+                    <strong>Nombre:</strong> {{ entidad.nombre }}
+                </div>
+                <div class="mb-3">
+                    <strong>Tipo de Persona:</strong> {{ entidad.get_tipo_persona_display }}
+                </div>
+                <div class="mb-3">
+                    <strong>Tipo de Entidad:</strong> {{ entidad.tipo_entidad }}
+                </div>
+                {% if entidad.otro_tipo_entidad %}
+                <div class="mb-3">
+                    <strong>Otro Tipo de Entidad:</strong> {{ entidad.otro_tipo_entidad }}
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                    <strong>Subcategoría:</strong> {{ entidad.subcategoria }}
+                </div>
+                <div class="mb-3">
+                    <strong>Tipo de Documento:</strong> {{ entidad.get_tipo_documento_display }}
+                </div>
+                <div class="mb-3">
+                    <strong>NIT/Documento:</strong> {{ entidad.nit }}
+                </div>
+                <div class="mb-3">
+                    <strong>RNT:</strong> {{ entidad.rnt }}
+                </div>
+                <div class="mb-3">
+                    <strong>País:</strong> {{ entidad.pais }}
+                </div>
+                <div class="mb-3">
+                    <strong>Departamento:</strong> {{ entidad.departamento }}
+                </div>
+                <div class="mb-3">
+                    <strong>Municipio:</strong> {{ entidad.municipio }}
+                </div>
+                <div class="mb-3">
+                    <strong>Dirección:</strong> {{ entidad.direccion }}
+                </div>
+                <div class="mb-3">
+                    <strong>Barrio:</strong> {{ entidad.barrio }}
+                </div>
+                <div class="mb-3">
+                    <strong>Observación Dirección:</strong> {{ entidad.observacion }}
+                </div>
+                <div class="mb-3">
+                    <strong>Características:</strong> {{ entidad.caracteristicas }}
+                </div>
+                <div class="mb-3">
+                    <strong>Email:</strong> {{ entidad.mail }}
+                </div>
+                <div class="mb-3">
+                    <strong>Usuario:</strong> {{ user.username }}
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#updateProfileModal">Modificar</button>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Eliminar Cuenta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Profile Modal -->
+<div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateProfileModalLabel">Actualizar Perfil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="profileUpdateForm" method="post" enctype="multipart/form-data" action="{% url 'profile_update' %}">
+                    {% csrf_token %}
+                    <div id="profile-update-error" class="alert alert-danger" style="display: none;"></div>
+                    
+                    <div class="mb-3">
+                        {% if form.logo.value %}
+                            <p><strong>Logo Actual:</strong></p>
+                            <img src="{{ form.logo.value.url }}" alt="Logo actual" style="max-height: 100px; margin-bottom: 10px;">
+                        {% endif %}
+                        <label for="{{ form.logo.id_for_label }}" class="form-label">{{ form.logo.label }}</label>
+                        {{ form.logo }}
+                        {% if form.logo.errors %}
+                            <div class="text-danger">{{ form.logo.errors|first }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% for field in form %}
+                        {% if field.name != 'logo' %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <button type="submit" class="btn btn-primary mt-3">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Confirmar Eliminación de Cuenta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible y se perderá toda la información asociada a tu cuenta de {{ entidad.tipo_entidad }}.</p>
+                <p>Para confirmar, ingresa tu contraseña:</p>
+                <input type="password" id="confirmPassword" class="form-control" placeholder="Ingresa tu contraseña">
+                <div id="passwordError" class="text-danger mt-2" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>Eliminar Permanentemente</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/profile_update.js' %}"></script>
+{% endblock %}

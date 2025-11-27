@@ -1,0 +1,656 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis servicios{% endblock %}
+
+{% block content %}
+<div class="container mt-4 profile-container">
+    <div class="profile-card glass-effect">
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Error</h4>
+            <p>{{ error }}</p>
+            <hr>
+            <p class="mb-0">Por favor, contacta al administrador si crees que esto es un error.</p>
+        </div>
+        {% elif entidad_tipo %}
+        <h2 class="mb-4">Mis servicios para: <span class="text-capitalize">{{ entidad_tipo }}</span></h2>
+
+        {% if entidad_tipo == 'Operadora turística o agencia de viajes' %}
+        <!-- Sección de búsqueda y selección de destinos y paquetes -->
+        <div class="mb-5">
+            <h3>Ver Destinos y Paquetes</h3>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="destino-select" class="form-label">Seleccionar Destino:</label>
+                    <select class="form-select" id="destino-select" name="destino-select">
+                        <option value="">Seleccione un destino...</option>
+                        {% for destino in destinos %}
+                        <option value="{{ destino.pk }}">{{ destino.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="paquete-select" class="form-label">Seleccionar Paquete:</label>
+                    <select class="form-select" id="paquete-select" name="paquete-select">
+                        <option value="">Seleccione un paquete...</option>
+                        {% for paquete in paquetes %}
+                        <option value="{{ paquete.pk }}">{{ paquete.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Buscador para destinos y paquetes -->
+            <div class="mb-3">
+                <label for="search-input" class="form-label">Buscar destino o paquete:</label>
+                <input type="text" class="form-control" id="search-input" placeholder="Escriba para buscar...">
+            </div>
+
+            <!-- Botones para crear -->
+            <div class="mb-4">
+                <a href="{% url 'destino-crear' %}" class="btn btn-primary me-2">Ingresar Nuevo Destino</a>
+                {% if entidad_tipo == 'Operadora turística o agencia de viajes' %}
+                <a href="{% url 'paquete-crear-vista' %}" class="btn btn-success">Ingresar Nuevo Paquete</a>
+                {% endif %}
+            </div>
+
+            <!-- Contenedor para mostrar la tarjeta seleccionada -->
+            <div id="selected-item-card-container" class="mt-4">
+                <!-- La tarjeta del ítem seleccionado aparecerá aquí -->
+            </div>
+        </div>
+        {% endif %}
+
+        {% if entidad_tipo == 'Transporte' %}
+        <!-- Sección de Transportes -->
+        <div class="mb-5">
+            <h3>Transportes</h3>
+            <a href="{% url 'transporte-crear' %}" class="btn btn-primary mb-3">Ingresar Nuevo Transporte</a>
+            {% if transportes %}
+            <div class="row">
+                {% for transporte in transportes %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        {% if transporte.imagen %}
+                            <img src="{{ transporte.imagen.url }}" class="card-img-top" alt="Imagen del vehículo" style="max-height: 150px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ transporte.get_modeloTransporte_display|default:transporte.tipoTransporte }}</h5>
+                            <p class="card-text"><strong>Nombre:</strong> {{ transporte.nombre|default:"Sin nombre" }}</p>
+                            <p class="card-text"><strong>Marca:</strong> {{ transporte.marca|default:"N/A" }}</p>
+                            <p class="card-text"><strong>Modelo:</strong> {{ transporte.modelo|default:"N/A" }}</p>
+                            <p class="card-text"><strong>Matrícula:</strong> {{ transporte.matricula|default:"N/A" }}</p>
+                            <p class="card-text"><strong>Capacidad:</strong> {{ transporte.pax|default:"N/A" }} pax</p>
+                            <p class="card-text"><strong>Tipo:</strong> {{ transporte.get_tipoTransporte_display }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'transporte-update' pk=transporte.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('transporte', '{{ transporte.nombre|default:transporte.matricula|default:transporte.tipoTransporte }}', '{% url 'transporte-delete' pk=transporte.pk %}', '{% url 'data_entry' %}')">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">No tienes transportes registrados aún.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if entidad_tipo == 'Transporte' %}
+        <!-- Sección de Rutas de Transporte -->
+        <div class="mb-5">
+            <h3>Rutas de Transporte</h3>
+            <a href="{% url 'ruta-transporte-crear' %}" class="btn btn-primary mb-3">Ingresar Nueva Ruta de Transporte</a>
+            <a href="{% url 'rutas-list' %}" class="btn btn-secondary mb-3 ms-2">Ver Rutas de Transporte</a>
+            <a href="{% url 'convenios-agencia-list' %}" class="btn btn-outline-primary mb-3 ms-2">Ver Convenios con Agencias</a>
+            <p class="text-muted">Vea los convenios con agencias de viaje y configure rutas con precios por temporada.</p>
+        </div>
+        {% endif %}
+
+        {% if entidad_tipo == 'Operadora turística o agencia de viajes' %}
+        <!-- Sección de Convenios de Agencia -->
+        <div class="mb-5">
+            <h3>Gestionar Convenios</h3>
+            <a href="{% url 'convenios-agencia-list' %}" class="btn btn-primary mb-3">Gestionar Convenios de Agencia</a>
+            <p class="text-muted">Cree convenios con transportadoras, alimentación, hospedaje y aseguradoras.</p>
+        </div>
+        {% endif %}
+
+        {% if entidad_tipo == 'Seguro' %}
+        <!-- Sección de Seguros -->
+        <div class="mb-5">
+            <h3>Seguros</h3>
+            <a href="{% url 'seguro-crear' %}" class="btn btn-primary mb-3">Ingresar Nuevo Seguro</a>
+            {% if seguros %}
+            <div class="row">
+                {% for seguro in seguros %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ seguro.nombre }}</h5>
+                            <p class="card-text">{{ seguro.descripcion|truncatewords:10 }}</p>
+                            <p class="card-text">Precio: ${{ seguro.precio }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'seguro-update' pk=seguro.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('seguro', '{{ seguro.nombre }}', '{% url 'seguro-delete' pk=seguro.pk %}', '{% url 'data_entry' %}')">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">No tienes seguros registrados aún.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if entidad_tipo == 'Hospedaje' %}
+        <!-- Sección de Hospedajes -->
+        <div class="mb-5">
+            <h3>Hospedajes</h3>
+            <a href="{% url 'hospedaje-crear' %}" class="btn btn-primary mb-3">Ingresar Nuevo Hospedaje</a>
+            {% if hospedajes %}
+            <div class="row">
+                {% for hospedaje in hospedajes %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ hospedaje.nombreLugar }}</h5>
+                            <p class="card-text">Tipo: {{ hospedaje.tipoHospedaje }}</p>
+                            <p class="card-text">Capacidad: {{ hospedaje.capacidadpax|default:"N/A" }} pax</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'hospedaje-update' pk=hospedaje.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('hospedaje', '{{ hospedaje.nombreLugar }}', '{% url 'hospedaje-delete' pk=hospedaje.pk %}', '{% url 'data_entry' %}')">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">No tienes hospedajes registrados aún.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+
+        {% if entidad_tipo == 'Alimentación' %}
+        <!-- Sección de Servicios de Alimentación -->
+        <div class="mb-5">
+            <h3>Servicios de Alimentación</h3>
+            <a href="{% url 'alimentacion-crear' %}" class="btn btn-primary mb-3">Ingresar Nuevo Servicio</a>
+            {% if alimentacion_services %}
+            <div class="row">
+                {% for service in alimentacion_services %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ service.nombre }}</h5>
+                            <p class="card-text">{{ service.meal_type }}</p>
+                            <p class="card-text">Precio por persona: ${{ service.price_per_person|default:"N/A" }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'alimentacion-update' pk=service.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('alimentacion', '{{ service.nombre }}', '{% url 'alimentacion-delete' pk=service.pk %}', '{% url 'data_entry' %}')">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">No tienes servicios de alimentación registrados aún.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+
+        {% if entidad_tipo != 'Operadora turística o agencia de viajes' and entidad_tipo != 'Transporte' and entidad_tipo != 'Hospedaje' and entidad_tipo != 'Alimentación' %}
+        <div class="alert alert-info" role="alert">
+            Actualmente no hay formularios de servicios específicos para tu tipo de entidad ({{ entidad_tipo }}).
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No se pudo determinar tu tipo de entidad o no tienes una entidad asociada.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Contenedor para mostrar detalles del destino seleccionado -->
+    <div id="destino-card-container-dataentry" class="mt-4" style="display: none;">
+        <!-- Destination card will be injected here by JavaScript -->
+    </div>
+</div>
+{% endblock %} <!-- Cierre del bloque content -->
+
+{% block extra_js %}
+{{ block.super }}
+{{ destinos_json|json_script:"destinos-data-dataentry" }}
+<script src="{% static 'js/destino_cards.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Obtener referencias a los elementos
+    const destinoSelect = document.getElementById('destino-select');
+    const paqueteSelect = document.getElementById('paquete-select');
+    const searchInput = document.getElementById('search-input');
+    const cardContainer = document.getElementById('selected-item-card-container');
+
+    // Crear contenedor para autocompletar
+    const autocompleteContainer = document.createElement('div');
+    autocompleteContainer.id = 'autocomplete-list';
+    autocompleteContainer.className = 'dropdown-menu autocomplete-dropdown';
+    autocompleteContainer.style = 'position: absolute; top: 100%; left: 0; z-index: 1000; display: none; width: 100%; max-height: 200px; overflow-y: auto; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);';
+    searchInput.parentNode.style.position = 'relative';
+    searchInput.parentNode.appendChild(autocompleteContainer);
+
+    // Variable para almacenar todas las coincidencias
+    let allSuggestions = [];
+
+    // Función para cargar y mostrar la tarjeta de un destino
+    function loadDestinoCard(destinoId) {
+        if (!destinoId) {
+            cardContainer.innerHTML = '';
+            return;
+        }
+
+        fetch(`/api/destinos/${destinoId}/`)
+            .then(response => response.json())
+            .then(destino => {
+                // Formatear la información de actividades (atraactivos)
+                let actividadesHtml = '';
+                if (destino.actividades && destino.actividades.length > 0) {
+                    actividadesHtml = '<h6 class="mt-3">Atractivos y Costos:</h6><ul class="list-group list-group-flush">';
+                    destino.actividades.forEach(actividad => {
+                        actividadesHtml += `
+                            <li class="list-group-item">
+                                <strong>${actividad.atractivo_nombre || actividad.nombre || 'Atractivo'}</strong> (${actividad.tipo_costo || 'Tipo no especificado'})
+                                ${actividad.precios && actividad.precios.length > 0 ? `
+                                    <ul class="list-unstyled ms-3">
+                                        ${actividad.precios.map(precio => `
+                                            <li>${precio.categoria}: TA: ${precio.temporada_alta}, TM: ${precio.temporada_media}, TB: ${precio.temporada_baja}
+                                        `).join('')}
+                                    </ul>
+                                ` : ''}
+                            </li>
+                        `;
+                    });
+                    actividadesHtml += '</ul>';
+                }
+
+                // Mostrar imágenes si existen
+                let imagenesHtml = '';
+                if (destino.imagenes && destino.imagenes.length > 0) {
+                    imagenesHtml = '<div class="mt-2">';
+                    destino.imagenes.slice(0, 3).forEach((img, index) => {
+                        imagenesHtml += `<img src="${img}" alt="Imagen ${index + 1}" class="img-thumbnail me-1" style="max-height: 100px;">`;
+                    });
+                    if (destino.imagenes.length > 3) {
+                        imagenesHtml += `<small class="text-muted">+${destino.imagenes.length - 3} más</small>`;
+                    }
+                    imagenesHtml += '</div>';
+                }
+
+                const cardHtml = `
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${destino.nombre}</h5>
+                            <p class="card-text"><strong>Ubicación:</strong> ${destino.ubicacion}</p>
+                            <p class="card-text"><strong>Categoría:</strong> ${destino.get_categoria_display || destino.categoria}</p>
+                            <p class="card-text"><strong>Descripción:</strong><br>${destino.descripcion}</p>
+                            ${imagenesHtml}
+                            ${actividadesHtml}
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="/api/destino/${destino.id}/update/" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('destino', '${destino.nombre}', '/api/destino/${destino.id}/delete/', '{% url 'data_entry' %}')">Eliminar</a>
+                            <a href="/api/destino/${destino.id}/" class="btn btn-sm btn-outline-info">Ver</a>
+                        </div>
+                    </div>
+                `;
+                cardContainer.innerHTML = cardHtml;
+            })
+            .catch(error => {
+                console.error('Error al cargar el destino:', error);
+                cardContainer.innerHTML = '<div class="alert alert-danger">Error al cargar los datos del destino.</div>';
+            });
+    }
+
+    // Función para cargar y mostrar la tarjeta de un paquete
+    function loadPaqueteCard(paqueteId) {
+        if (!paqueteId) {
+            cardContainer.innerHTML = '';
+            return;
+        }
+
+        fetch(`/api/paquetes/${paqueteId}/`, {
+            headers: {
+                'Accept': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Paquete no encontrado');
+            }
+            return response.json();
+        })
+        .then(paquete => {
+                // Mostrar información de destinos asociados si existen
+                let destinosHtml = '';
+                if (paquete.destinos && paquete.destinos.length > 0) {
+                    destinosHtml = '<h6 class="mt-3">Destinos incluidos:</h6><ul class="list-group list-group-flush">';
+                    paquete.destinos.forEach(destino => {
+                        destinosHtml += `<li class="list-group-item">${destino.nombre || destino}</li>`;
+                    });
+                    destinosHtml += '</ul>';
+                } else if (paquete.destinos_count) {
+                    destinosHtml = `<p class="card-text"><strong>Destinos:</strong> ${paquete.destinos_count}</p>`;
+                }
+
+                const cardHtml = `
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${paquete.nombre}</h5>
+                            <p class="card-text"><strong>Temporada:</strong> ${paquete.get_temporada_display || paquete.temporada}</p>
+                            <p class="card-text"><strong>Precio Total:</strong> $${paquete.precio_total || paquete.precioTotal || 0}</p>
+                            ${destinosHtml}
+                        </div>
+                        <div class="card-footer">
+                            <a href="/paquetes/${paquete.id}/editar/" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="/paquetes/${paquete.id}/eliminar/" class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('paquete', '${paquete.nombre}', '/paquetes/${paquete.id}/eliminar/', '{% url 'data_entry' %}')">Eliminar</a>
+                        </div>
+                    </div>
+                `;
+                cardContainer.innerHTML = cardHtml;
+            })
+            .catch(error => {
+                console.error('Error al cargar el paquete:', error);
+                cardContainer.innerHTML = '<div class="alert alert-danger">Error al cargar los datos del paquete.</div>';
+            });
+    }
+
+    // Eventos para los selectores
+    if (destinoSelect) {
+        destinoSelect.addEventListener('change', function() {
+            const selectedDestinoId = this.value;
+            if (selectedDestinoId) {
+                loadDestinoCard(selectedDestinoId);
+                // Limpiar el selector de paquetes
+                if (paqueteSelect) paqueteSelect.value = '';
+            }
+        });
+    }
+
+    if (paqueteSelect) {
+        paqueteSelect.addEventListener('change', function() {
+            const selectedPaqueteId = this.value;
+            if (selectedPaqueteId) {
+                loadPaqueteCard(selectedPaqueteId);
+                // Limpiar el selector de destinos
+                if (destinoSelect) destinoSelect.value = '';
+            }
+        });
+    }
+
+    // Función para mostrar sugerencias de autocompletar
+    function showAutocompleteSuggestions(suggestions) {
+        autocompleteContainer.innerHTML = '';
+
+        if (suggestions.length === 0) {
+            autocompleteContainer.style.display = 'none';
+            return;
+        }
+
+        suggestions.forEach((suggestion, index) => {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item autocomplete-item';
+            item.style = 'padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid #eee;';
+            item.innerHTML = suggestion.nombre;
+
+            // Destacar la parte que coincide con la búsqueda
+            const query = searchInput.value.toLowerCase();
+            if (query) {
+                const regex = new RegExp(`(${query})`, 'gi');
+                item.innerHTML = suggestion.nombre.replace(regex, '<strong>$1</strong>');
+            }
+
+            item.addEventListener('click', function() {
+                searchInput.value = suggestion.nombre;
+                autocompleteContainer.style.display = 'none';
+                // Seleccionar directamente el ítem
+                if (suggestion.tipo === 'destino') {
+                    selectItem('destino', suggestion.id);
+                } else if (suggestion.tipo === 'paquete') {
+                    selectItem('paquete', suggestion.id);
+                }
+            });
+
+            autocompleteContainer.appendChild(item);
+        });
+
+        autocompleteContainer.style.display = 'block';
+    }
+
+    // Función para ocultar sugerencias
+    function hideAutocompleteSuggestions() {
+        setTimeout(() => {
+            autocompleteContainer.style.display = 'none';
+        }, 150);
+    }
+
+    // Funcionalidad de autocompletar
+    if (searchInput) {
+        let timeout;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const query = this.value.trim();
+
+            if (query.length === 0) {
+                autocompleteContainer.style.display = 'none';
+                cardContainer.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                // Hacer la búsqueda para autocompletar usando el nuevo endpoint
+                fetch(`/api/autocomplete-destinations-packages/?q=${encodeURIComponent(query)}`)
+                    .then(response => {
+                        // Verificar si la respuesta es correcta
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        // Verificar que la respuesta sea JSON
+                        const contentType = response.headers.get("content-type");
+                        if (!contentType || !contentType.includes("application/json")) {
+                            throw new Error("Response is not JSON");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Verificar que los datos tengan la estructura esperada
+                        if (!data.success) {
+                            console.error('Error en la API:', data.message || 'Datos no válidos');
+                            autocompleteContainer.style.display = 'none';
+                            return;
+                        }
+
+                        // Combinar destinos y paquetes en una sola lista para autocompletar
+                        const allResults = [
+                            ...data.destinos.map(d => ({...d, tipo: 'destino'})),
+                            ...data.paquetes.map(p => ({...p, tipo: 'paquete'}))
+                        ];
+
+                        // Limpiar contenedor de autocompletar
+                        autocompleteContainer.innerHTML = '';
+
+                        if (allResults.length > 0) {
+                            // Mostrar sugerencias con coincidencias resaltadas
+                            allResults.forEach((item, index) => {
+                                const itemElement = document.createElement('div');
+                                itemElement.className = 'autocomplete-item dropdown-item';
+                                itemElement.style = 'padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid #eee;';
+
+                                // Resaltar la parte que coincide con la búsqueda
+                                const regex = new RegExp(`(${query})`, 'gi');
+                                const highlightedName = item.nombre.replace(regex, '<strong>$1</strong>');
+
+                                itemElement.innerHTML = `${highlightedName} (${item.tipo})`;
+
+                                itemElement.addEventListener('click', function() {
+                                    searchInput.value = item.nombre;
+                                    autocompleteContainer.style.display = 'none';
+
+                                    // Seleccionar el elemento en el selector correspondiente
+                                    if (item.tipo === 'destino') {
+                                        if (destinoSelect) {
+                                            destinoSelect.value = item.id;
+                                            loadDestinoCard(item.id);
+                                        }
+                                    } else if (item.tipo === 'paquete') {
+                                        if (paqueteSelect) {
+                                            paqueteSelect.value = item.id;
+                                            loadPaqueteCard(item.id);
+                                        }
+                                    }
+                                });
+
+                                itemElement.addEventListener('mouseover', function() {
+                                    // Remover clase activa de otros items
+                                    autocompleteContainer.querySelectorAll('.autocomplete-item').forEach(otherItem => {
+                                        otherItem.classList.remove('active');
+                                        otherItem.style.backgroundColor = '';
+                                    });
+                                    // Agregar clase activa al item actual
+                                    itemElement.classList.add('active');
+                                    itemElement.style.backgroundColor = '#e9ecef';
+                                });
+
+                                autocompleteContainer.appendChild(itemElement);
+                            });
+
+                            autocompleteContainer.style.display = 'block';
+                        } else {
+                            autocompleteContainer.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error en la búsqueda de autocompletar:', error);
+                        // Ocultar el contenedor de autocompletar en caso de error
+                        autocompleteContainer.style.display = 'none';
+                    });
+            }, 200); // Retraso menor para una respuesta más rápida
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                autocompleteContainer.style.display = 'block';
+            }
+        });
+
+        searchInput.addEventListener('blur', function() {
+            hideAutocompleteSuggestions();
+        });
+
+        // Manejar teclas de dirección y enter
+        searchInput.addEventListener('keydown', function(e) {
+            const items = autocompleteContainer.querySelectorAll('.autocomplete-item');
+            if (!items.length) return;
+
+            let currentIndex = Array.from(items).findIndex(item =>
+                item.classList.contains('active')
+            );
+
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    currentIndex = (currentIndex < items.length - 1) ? currentIndex + 1 : 0;
+                    updateActiveItem(currentIndex);
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    currentIndex = (currentIndex > 0) ? currentIndex - 1 : items.length - 1;
+                    updateActiveItem(currentIndex);
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (currentIndex >= 0) {
+                        items[currentIndex].click();
+                    } else if (allSuggestions.length > 0) {
+                        // Si no hay item activo pero hay sugerencias, usar la primera
+                        const firstSuggestion = allSuggestions[0];
+                        searchInput.value = firstSuggestion.nombre;
+                        autocompleteContainer.style.display = 'none';
+                        if (firstSuggestion.tipo === 'destino') {
+                            selectItem('destino', firstSuggestion.id);
+                        } else if (firstSuggestion.tipo === 'paquete') {
+                            selectItem('paquete', firstSuggestion.id);
+                        }
+                    }
+                    break;
+                case 'Escape':
+                    autocompleteContainer.style.display = 'none';
+                    break;
+            }
+        });
+
+        // Función para actualizar el elemento activo
+        function updateActiveItem(index) {
+            const items = autocompleteContainer.querySelectorAll('.autocomplete-item');
+            items.forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+                item.style.backgroundColor = i === index ? '#e9ecef' : '';
+            });
+        }
+    }
+
+    // Función para seleccionar un ítem desde los resultados de búsqueda
+    window.selectItem = function(itemType, itemId) {
+        if (itemType === 'destino') {
+            if (destinoSelect) destinoSelect.value = itemId;
+            loadDestinoCard(itemId);
+        } else if (itemType === 'paquete') {
+            if (paqueteSelect) paqueteSelect.value = itemId;
+            loadPaqueteCard(itemId);
+        }
+    };
+
+    // Función para cargar todos los destinos y paquetes a los selectores (si es necesario)
+    function loadSelectors() {
+        fetch('/api/get-destinations-packages/')
+            .then(response => response.json())
+            .then(data => {
+                // Poblar el selector de destinos (si está vacío)
+                if (destinoSelect && destinoSelect.options.length <= 1) { // 1 para la opción por defecto
+                    data.destinos.forEach(destino => {
+                        const option = document.createElement('option');
+                        option.value = destino.id;
+                        option.textContent = destino.nombre;
+                        destinoSelect.appendChild(option);
+                    });
+                }
+
+                // Poblar el selector de paquetes (si está vacío y es operadora turística)
+                if (paqueteSelect && paqueteSelect.options.length <= 1 && '{% if entidad_tipo == "Operadora turística o agencia de viajes" %}true{% endif %}' === 'true') {
+                    data.paquetes.forEach(paquete => {
+                        const option = document.createElement('option');
+                        option.value = paquete.id;
+                        option.textContent = paquete.nombre;
+                        paqueteSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar los selectores:', error);
+            });
+    }
+
+    // Cargar selectores si es necesario
+    loadSelectors();
+});
+</script>
+{% endblock %}

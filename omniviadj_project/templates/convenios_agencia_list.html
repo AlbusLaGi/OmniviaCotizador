@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Convenios de Agencia{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Convenios de Agencia</h2>
+            
+            {% if user.entidad.tipo_entidad == 'Operadora turística o agencia de viajes' %}
+                <a href="{% url 'convenio-agencia-crear' %}" class="btn btn-primary mb-3">Agregar Nuevo Convenio de Agencia</a>
+            {% endif %}
+            
+            {% if convenios_agencia %}
+                <div class="row">
+                    {% for convenio in convenios_agencia %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ convenio.entidad_agencia.nombre }} - {{ convenio.entidad_convenio.nombre }}</h5>
+                                    <p class="card-text">
+                                        <strong>Tipo:</strong> {{ convenio.get_tipo_convenio_display }}<br>
+                                        {% if convenio.ciudad_origen %}
+                                            <strong>Ciudad Origen:</strong> {{ convenio.ciudad_origen }}<br>
+                                        {% endif %}
+                                        <strong>Porcentaje de Convenio:</strong> {{ convenio.porcentaje_descuento }}%<br>
+                                        <strong>Fecha Inicio:</strong> {{ convenio.fecha_inicio|default:"No especificada" }}<br>
+                                        <strong>Fecha Fin:</strong> {{ convenio.fecha_fin|default:"No especificada" }}<br>
+                                        {% if convenio.activo %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        {% endif %}
+                                    </p>
+                                    <p class="card-text">
+                                        <small class="text-muted">{{ convenio.descripcion|truncatewords:20 }}</small>
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    {% if user.entidad.tipo_entidad == 'Operadora turística o agencia de viajes' %}
+                                        <a href="{% url 'convenio-agencia-update' pk=convenio.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                                        <a href="{% url 'convenio-agencia-delete' pk=convenio.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No hay convenios de agencia registrados.
+                    {% if user.entidad.tipo_entidad == 'Operadora turística o agencia de viajes' %}
+                        <a href="{% url 'convenio-agencia-crear' %}">Crear el primer convenio</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

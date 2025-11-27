@@ -1,0 +1,88 @@
+<form method="post" action="{% url 'destino-update' pk=object.pk %}">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
+        {{ form.nombre }}
+        {% for error in form.nombre.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.ubicacion.id_for_label }}" class="form-label">{{ form.ubicacion.label }}</label>
+        {{ form.ubicacion }}
+        {% for error in form.ubicacion.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.descripcion.id_for_label }}" class="form-label">{{ form.descripcion.label }}</label>
+        {{ form.descripcion }}
+        {% for error in form.descripcion.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.categoria.id_for_label }}" class="form-label">{{ form.categoria.label }}</label>
+        {{ form.categoria }}
+        {% for error in form.categoria.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    {% if form.categoria_otro %}
+    <div class="mb-3" id="categoria-otro-container" style="display: none;">
+        <label for="{{ form.categoria_otro.id_for_label }}" class="form-label">{{ form.categoria_otro.label }}</label>
+        {{ form.categoria_otro }}
+        {% for error in form.categoria_otro.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="mb-3">
+        <label for="{{ form.imagenes_texto.id_for_label }}" class="form-label">{{ form.imagenes_texto.label }}</label>
+        {{ form.imagenes_texto }}
+        <small class="form-text">Ingrese las URLs de las imágenes separadas por comas</small>
+        {% for error in form.imagenes_texto.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.actividades.id_for_label }}" class="form-label">{{ form.actividades.label }}</label>
+        {{ form.actividades }}
+        {% for error in form.actividades.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+    </div>
+</form>
+
+<script>
+// Lógica para el campo "Otro" categoría
+document.addEventListener('DOMContentLoaded', function() {
+    const categoriaSelect = document.getElementById('{{ form.categoria.id_for_label }}');
+    const categoriaOtroContainer = document.getElementById('categoria-otro-container');
+    
+    function toggleCategoriaOtro() {
+        if (categoriaSelect.value === 'Otro') {
+            categoriaOtroContainer.style.display = 'block';
+        } else {
+            categoriaOtroContainer.style.display = 'none';
+        }
+    }
+    
+    if (categoriaSelect) {
+        toggleCategoriaOtro();
+        categoriaSelect.addEventListener('change', toggleCategoriaOtro);
+    }
+});
+</script>

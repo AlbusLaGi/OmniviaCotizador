@@ -1,0 +1,174 @@
+1. Árbol de la Base de Datos para Alimentacion
+
+  Basado en backend/src/alimentacion/dto/alimentacion.model.ts:
+
+    1 Alimentacion (Colección)
+    2 ├── _id: ObjectId (automático)
+    3 ├── nombre: String (requerido)
+    4 ├── descripcion: String (requerido)
+    5 ├── tipoPlan: String (requerido, enum: 'Plan Europeo', 'Desayuno
+      Continental', ...)
+    6 ├── comidas: Object
+    7 │   ├── desayunoContinental: Boolean (default: false)
+    8 │   ├── desayunoAmericano: Boolean (default: false)
+    9 │   ├── desayunoBuffet: Boolean (default: false)
+   10 │   ├── almuerzo: Boolean (default: false)
+   11 │   ├── cena: Boolean (default: false)
+   12 │   └── snacks: Boolean (default: false)
+   13 ├── bebidas: Object
+   14 │   ├── barAbierto: Boolean (default: false)
+   15 │   ├── barCerrado: Boolean (default: false)
+   16 │   ├── bebidasNacionales: Boolean (default: false)
+   17 │   ├── bebidasInternacionales: Boolean (default: false)
+   18 │   └── bebidasNoAlcoholicas: Boolean (default: false)
+   19 ├── precio: Number (requerido)
+   20 ├── incluyePropinas: Boolean (default: false)
+   21 ├── observaciones: String
+   22 ├── restricciones: Array of String (default: [])
+   23 ├── horariosServicio: String
+   24 ├── opcionVegana: Object
+   25 │   ├── disponible: Boolean (default: false)
+   26 │   ├── descripcion: String
+   27 │   └── precioAdicional: Number (default: 0)
+   28 ├── opcionVegetariana: Object
+   29 │   ├── disponible: Boolean (default: false)
+   30 │   ├── descripcion: String
+   31 │   └── precioAdicional: Number (default: 0)
+   32 ├── opcionSinGluten: Object
+   33 │   ├── disponible: Boolean (default: false)
+   34 │   ├── descripcion: String
+   35 │   └── precioAdicional: Number (default: 0)
+   36 ├── opcionMariscos: Object
+   37 │   ├── disponible: Boolean (default: false)
+   38 │   ├── descripcion: String
+   39 │   └── precioAdicional: Number (default: 0)
+   40 ├── opcionGastronomiaLocal: Object
+   41 │   ├── disponible: Boolean (default: false)
+   42 │   ├── descripcion: String
+   43 │   └── precioAdicional: Number (default: 0)
+   44 ├── opcionKosher: Object
+   45 │   ├── disponible: Boolean (default: false)
+   46 │   ├── descripcion: String
+   47 │   └── precioAdicional: Number (default: 0)
+   48 └── opcionHalal: Object
+   49     ├── disponible: Boolean (default: false)
+   50     ├── descripcion: String
+   51     └── precioAdicional: Number (default: 0)
+
+  ---
+
+  2. Árbol de la Base de Datos para Destino
+
+  Basado en backend/src/destino/destino dto/destino.model.ts:
+
+    1 Destino (Colección)
+    2 ├── _id: ObjectId (automático)
+    3 ├── nombre: String (requerido)
+    4 ├── ubicacion: String (requerido)
+    5 ├── descripcion: String (requerido)
+    6 ├── categoria: String (requerido)
+    7 ├── precios: Object
+    8 │   ├── temporadaAlta: Number (requerido)
+    9 │   ├── temporadaMedia: Number (requerido)
+   10 │   └── temporadaBaja: Number (requerido)
+   11 ├── imagenes: Array of String (default: [])
+   12 ├── actividades: Array of String (default: [])
+   13 ├── duracionRecomendada: Number (default: 1)
+   14 └── temporadaIdeal: String
+
+  ---
+
+  3. Árbol de la Base de Datos para Entidad
+
+  Basado en backend/src/entidad/entidad dto/entidad.model.ts:
+
+    1 Entidad (Colección)
+    2 ├── _id: ObjectId (automático)
+    3 ├── mail: String
+    4 ├── password: String
+    5 ├── Nombre: String
+    6 ├── Tipo: String
+    7 ├── Caracteristicas: String
+    8 ├── Ubicacion: String
+    9 ├── RNT: Number
+   10 └── NIT: Number
+
+  ---
+
+  4. Árbol de la Base de Datos para Hospedaje
+
+  Basado en backend/src/hospedaje/hospedaje.dto/hospedaje.model.ts:
+
+    1 Hospedaje (Colección)
+    2 ├── _id: ObjectId (automático)
+    3 ├── tipoHospedaje: String (requerido, enum: 'Hotel', 'Hostal', ...)
+    4 ├── nombreLugar: String (requerido)
+    5 ├── hoteles: String (default: false)
+    6 ├── hostales: String (default: false)
+    7 ├── apartamentos: String (default: false)
+    8 ├── casas: String (default: false)
+    9 ├── cabañas: String (default: false)
+   10 ├── fincas: String (default: false)
+   11 ├── glamping: String (default: false)
+   12 ├── picnic: String (default: false)
+   13 ├── capacidadpax: Number
+   14 ├── habitaciones: Number
+   15 ├── restaurante: String (default: false)
+   16 ├── zonawifi: String (default: false)
+   17 ├── piscina: String (default: false)
+   18 ├── zonaDeFumadores: String (default: false)
+   19 ├── petFriendly: String (default: false)
+   20 ├── bar: String (default: false)
+   21 ├── spa: String (default: false)
+   22 ├── recreacionInfantil: String (default: false)
+   23 ├── zonasverdes: String (default: false)
+   24 ├── zonaCamping: String (default: false)
+   25 ├── zonaGlamping: String (default: false)
+   26 ├── gimnasio: String (default: false)
+   27 ├── coworking: String (default: false)
+   28 ├── ubicacion: String
+   29 ├── calificacion: Number
+   30 ├── createdAt: Date (automático, si timestamps es true)
+   31 └── updatedAt: Date (automático, si timestamps es true)
+
+  ---
+
+  5. Árbol de la Base de Datos para Seguro
+
+  Basado en backend/src/seguro/segurodto/seguro.model.ts:
+
+   1 Seguro (Colección)
+   2 ├── _id: ObjectId (automático)
+   3 ├── idSeguro: String (requerido)
+   4 ├── idPoliza: String (requerido)
+   5 ├── nombre: String (requerido)
+   6 ├── descripcion: String (requerido)
+   7 ├── precio: Number (requerido)
+   8 └── cobertura: String (requerido)
+
+  ---
+
+  6. Árbol de la Base de Datos para Transporte
+
+  Basado en backend/src/transporte/transporte dto/transporte.model.ts:
+
+    1 Transporte (Colección)
+    2 ├── _id: ObjectId (automático)
+    3 ├── tipoTransporte: String (requerido, enum: 'aereo', 'terrestre',
+      'maritimo')
+    4 ├── nombre: String
+    5 ├── RNT: Number
+    6 ├── pax: Number
+    7 ├── capacidadCarga: String
+    8 ├── baño: Boolean (default: false)
+    9 ├── marca: String (específico para terrestre)
+   10 ├── modelo: String (específico para terrestre)
+   11 ├── cantidad: Number (específico para terrestre)
+   12 ├── aire: Boolean (default: false, específico para terrestre)
+   13 ├── sillasrecli: Boolean (default: false, específico para terrestre)
+   14 ├── pantallas: Number (default: 0, específico para terrestre)
+   15 ├── wifi: Boolean (default: false, específico para terrestre)
+   16 ├── enchufes: Boolean (default: false, específico para terrestre)
+   17 ├── tipoVuelo: String (específico para aéreo)
+   18 ├── matriculas: Number (específico para marítimo)
+   19 └── bar: Boolean (default: false, específico para marítimo)

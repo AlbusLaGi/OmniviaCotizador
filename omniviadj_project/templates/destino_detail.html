@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalles del Destino: {{ destino.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 profile-container">
+    <div class="profile-card glass-effect">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>{{ destino.nombre }}</h1>
+            <a href="{% url 'data_entry' %}" class="btn btn-secondary">Volver a Mis Servicios</a>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Información General</h3>
+                        <p><strong>Ubicación:</strong> {{ destino.ubicacion }}
+                            {% if destino.ubicacion %}
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ destino.ubicacion }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">Ver en Google Maps</a>
+                            {% endif %}
+                        </p>
+                        <p><strong>Categoría:</strong> {{ destino.get_categoria_display }}</p>
+                        {% if destino.categoria_otro %}
+                            <p><strong>Especificar Categoría:</strong> {{ destino.categoria_otro }}</p>
+                        {% endif %}
+                        <p><strong>Descripción:</strong></p>
+                        <p>{{ destino.descripcion }}</p>
+                    </div>
+                </div>
+                
+                {% if destino.actividades %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Atractivos y Costos</h3>
+                        {% for atractivo in destino.actividades %}
+                        <div class="mb-3 p-2 border rounded">
+                            <h5>{{ atractivo.atractivo_nombre|default:"N/A" }}</h5>
+                            <p><strong>Tipo:</strong> {{ atractivo.tipo_costo|default:"N/A" }}</p>
+                            {% if atractivo.tipo_costo == 'Con Costo' and atractivo.precios %}
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Descripción</th>
+                                            <th>Temporada Alta</th>
+                                            <th>Temporada Media</th>
+                                            <th>Temporada Baja</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for precio in atractivo.precios %}
+                                        <tr>
+                                            <td>{{ precio.categoria|default:"N/A" }}</td>
+                                            <td>{{ precio.temporada_alta|default:"0" }}</td>
+                                            <td>{{ precio.temporada_media|default:"0" }}</td>
+                                            <td>{{ precio.temporada_baja|default:"0" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Acciones</h4>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'destino-update' pk=destino.pk %}" class="btn btn-primary">Editar</a>
+                            <a href="{% url 'destino-delete' pk=destino.pk %}" class="btn btn-danger" onclick="return confirm('¿Está seguro de que desea eliminar este destino?')">Eliminar</a>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if destino.imagenes %}
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h4 class="card-title">Imágenes</h4>
+                        {% for imagen_url in destino.imagenes %}
+                        <div class="mb-2">
+                            <img src="{{ imagen_url }}" alt="Imagen del destino" class="img-fluid" style="max-height: 200px; object-fit: cover;">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

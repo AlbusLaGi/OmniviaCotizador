@@ -1,0 +1,959 @@
+{% extends 'form_base.html' %}
+{% load static %}
+
+{% block form_title %}{% if object %}Editar Hospedaje{% else %}Crear Hospedaje{% endif %}{% endblock %}
+
+{% block form_heading %}{% if object %}Editar Hospedaje{% else %}Crear Nuevo Hospedaje{% endif %}{% endblock %}
+
+{% block delete_url %}{% url 'hospedaje-delete' pk=object.pk %}{% endblock %}
+
+{% block object_type %}hospedaje{% endblock %}
+
+{% block form_fields %}
+    {% csrf_token %}
+
+    <!-- Nombre del hospedaje -->
+    <div class="mb-3">
+        <label for="id_nombre_hospedaje" class="form-label">{{ form.nombre_hospedaje.label }}</label>
+        {{ form.nombre_hospedaje }}
+        {% if form.nombre_hospedaje.help_text %}
+            <div class="form-text">{{ form.nombre_hospedaje.help_text }}</div>
+        {% endif %}
+        {% for error in form.nombre_hospedaje.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Campos de ubicación -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="id_pais" class="form-label">{{ form.pais.label }}</label>
+            {{ form.pais }}
+            {% for error in form.pais.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="id_departamento" class="form-label">{{ form.departamento.label }}</label>
+            {{ form.departamento }}
+            {% for error in form.departamento.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="id_municipio" class="form-label">{{ form.municipio.label }}</label>
+            {{ form.municipio }}
+            {% for error in form.municipio.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Ubicación detallada -->
+    <div class="mb-3">
+        <label for="id_ubicacion" class="form-label">{{ form.ubicacion.label }}</label>
+        {{ form.ubicacion }}
+        <small class="form-field-note">
+            Ej: 5.057486, -75.506671. Puedes usar <a href="https://www.google.com/maps" target="_blank">Google Maps</a> para obtener las coordenadas. <a href="https://youtu.be/42Ep1ASExJ4?si=O3IwUkiAQCzKiWhe" target="_blank">'tutorial aqui'</a>
+        </small>
+        {% for error in form.ubicacion.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Capacidad y habitaciones -->
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="id_capacidadpax" class="form-label">{{ form.capacidadpax.label }}</label>
+            {{ form.capacidadpax }}
+            {% for error in form.capacidadpax.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="id_habitaciones" class="form-label">{{ form.habitaciones.label }}</label>
+            {{ form.habitaciones }}
+            {% for error in form.habitaciones.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Calificación con estrellas -->
+    <div class="mb-3">
+        <label class="form-label">Calificación</label>
+        <div class="star-rating">
+            <div class="stars-container">
+                <span class="star" data-value="1">☆</span>
+                <span class="star" data-value="2">☆</span>
+                <span class="star" data-value="3">☆</span>
+                <span class="star" data-value="4">☆</span>
+                <span class="star" data-value="5">☆</span>
+            </div>
+            <input type="hidden" id="id_calificacion" name="calificacion" value="{{ form.instance.calificacion|default:0 }}">
+            <span id="rating-text" class="ms-2">({{ form.instance.calificacion|default:0 }}/5)</span>
+        </div>
+        {% for error in form.calificacion.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Tipos de hospedaje (checkboxes) -->
+    <hr>
+    <div class="mb-3">
+        <h5>Tipo de Hospedaje</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check">
+                    {{ form.hoteles }}
+                    <label class="form-check-label" for="{{ form.hoteles.id_for_label }}">{{ form.hoteles.label|default:"Hotel" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.hostales }}
+                    <label class="form-check-label" for="{{ form.hostales.id_for_label }}">{{ form.hostales.label|default:"Hostal" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.apartamentos }}
+                    <label class="form-check-label" for="{{ form.apartamentos.id_for_label }}">{{ form.apartamentos.label|default:"Apartamento" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.casas }}
+                    <label class="form-check-label" for="{{ form.casas.id_for_label }}">{{ form.casas.label|default:"Casa" }}</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    {{ form.cabañas }}
+                    <label class="form-check-label" for="{{ form.cabañas.id_for_label }}">{{ form.cabañas.label|default:"Cabaña" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.fincas }}
+                    <label class="form-check-label" for="{{ form.fincas.id_for_label }}">{{ form.fincas.label|default:"Finca" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.glamping }}
+                    <label class="form-check-label" for="{{ form.glamping.id_for_label }}">{{ form.glamping.label|default:"Glamping" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.picnic }}
+                    <label class="form-check-label" for="{{ form.picnic.id_for_label }}">{{ form.picnic.label|default:"Picnic" }}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instalaciones y Servicios -->
+    <hr>
+    <div class="mb-3">
+        <h5>Instalaciones y Servicios</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check">
+                    {{ form.restaurante }}
+                    <label class="form-check-label" for="{{ form.restaurante.id_for_label }}">{{ form.restaurante.label|default:"Restaurante" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonawifi }}
+                    <label class="form-check-label" for="{{ form.zonawifi.id_for_label }}">{{ form.zonawifi.label|default:"Zona WiFi" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.piscina }}
+                    <label class="form-check-label" for="{{ form.piscina.id_for_label }}">{{ form.piscina.label|default:"Piscina" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonaDeFumadores }}
+                    <label class="form-check-label" for="{{ form.zonaDeFumadores.id_for_label }}">{{ form.zonaDeFumadores.label|default:"Zona de Fumadores" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.petFriendly }}
+                    <label class="form-check-label" for="{{ form.petFriendly.id_for_label }}">{{ form.petFriendly.label|default:"Pet Friendly" }}</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    {{ form.bar }}
+                    <label class="form-check-label" for="{{ form.bar.id_for_label }}">{{ form.bar.label|default:"Bar" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.spa }}
+                    <label class="form-check-label" for="{{ form.spa.id_for_label }}">{{ form.spa.label|default:"Spa" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.recreacionInfantil }}
+                    <label class="form-check-label" for="{{ form.recreacionInfantil.id_for_label }}">{{ form.recreacionInfantil.label|default:"Recreación Infantil" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonasverdes }}
+                    <label class="form-check-label" for="{{ form.zonasverdes.id_for_label }}">{{ form.zonasverdes.label|default:"Zonas Verdes" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonaCamping }}
+                    <label class="form-check-label" for="{{ form.zonaCamping.id_for_label }}">{{ form.zonaCamping.label|default:"Zona Camping" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonaGlamping }}
+                    <label class="form-check-label" for="{{ form.zonaGlamping.id_for_label }}">{{ form.zonaGlamping.label|default:"Zona Glamping" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.gimnasio }}
+                    <label class="form-check-label" for="{{ form.gimnasio.id_for_label }}">{{ form.gimnasio.label|default:"Gimnasio" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.coworking }}
+                    <label class="form-check-label" for="{{ form.coworking.id_for_label }}">{{ form.coworking.label|default:"Coworking" }}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de bar - añadir el campo de tipo_barra -->
+    <div class="mb-3" id="bar-section" style="display: none;">
+        <label for="{{ form.tipo_barra.id_for_label }}" class="form-label">{{ form.tipo_barra.label }}</label>
+        {{ form.tipo_barra }}
+        {% for error in form.tipo_barra.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Información de habitaciones y precios -->
+    <hr>
+    <div class="mb-3">
+        <h5>Información de Habitaciones y Precios</h5>
+        <small class="form-field-note">
+            Gestione aquí la información de diferentes tipos de habitaciones y sus precios por temporada (Alta, Media, Baja).
+            Cada habitación puede tener precios diferentes según la temporada.
+        </small>
+        <div id="habitaciones-container" class="mt-3">
+            <!-- Aquí se insertarán dinámicamente las habitaciones y precios -->
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-habitacion-btn">
+            <i class="fas fa-plus"></i> Agregar Tipo de Habitación
+        </button>
+        {{ form.habitaciones_info.as_hidden }}
+        {% for error in form.habitaciones_info.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Formulario de Alimentación (oculto por defecto, se muestra cuando se marca restaurante) -->
+    <div id="formulario-alimentacion" style="display: none;">
+        <hr>
+        <div class="mb-3">
+            <h5>Información del Restaurante</h5>
+            <small class="form-field-note">
+                Datos adicionales para el servicio de restaurante de su hospedaje
+            </small>
+        </div>
+
+        <!-- Campos principales del formulario de alimentación -->
+        <div class="mb-3">
+            <label for="id_nombre_alimentacion" class="form-label">Nombre del Restaurante</label>
+            <input type="text" class="form-control" id="id_nombre_alimentacion" name="nombre_alimentacion" placeholder="Nombre del restaurante">
+        </div>
+
+        <div class="mb-3">
+            <label for="id_descripcion_alimentacion" class="form-label">Descripción del Restaurante</label>
+            <textarea class="form-control" id="id_descripcion_alimentacion" name="descripcion_alimentacion" rows="3" placeholder="Descripción del restaurante"></textarea>
+        </div>
+
+        <!-- Tipo de Comida/Servicio -->
+        <div class="mb-3">
+            <label class="form-label">Tipo de Comida/Servicio</label>
+            <div id="meal-type-container">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="meal_type" value="Desayuno" id="meal_type_desayuno">
+                    <label class="form-check-label" for="meal_type_desayuno">Desayuno</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="meal_type" value="Almuerzo" id="meal_type_almuerzo">
+                    <label class="form-check-label" for="meal_type_almuerzo">Almuerzo</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="meal_type" value="Cena" id="meal_type_cena">
+                    <label class="form-check-label" for="meal_type_cena">Cena</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="meal_type" value="Snack" id="meal_type_snack">
+                    <label class="form-check-label" for="meal_type_snack">Snack</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="meal_type" value="Cocteles" id="meal_type_cocteles">
+                    <label class="form-check-label" for="meal_type_cocteles">Cocteles</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="meal_type" value="Bar" id="meal_type_bar">
+                    <label class="form-check-label" for="meal_type_bar">Bar</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="meal_type" value="Otro" id="meal_type_otro">
+                    <label class="form-check-label" for="meal_type_otro">Otro</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tipo de Plan y Cocina -->
+        <div class="mb-3">
+            <label class="form-label">Tipo de Plan y Cocina</label>
+            <div id="servicios-tipo-container">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Plan Europeo" id="servicio_plan_europeo">
+                    <label class="form-check-label" for="servicio_plan_europeo">Plan Europeo</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Desayuno Continental" id="servicio_desayuno_cont">
+                    <label class="form-check-label" for="servicio_desayuno_cont">Desayuno Continental</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Local" id="servicio_local">
+                    <label class="form-check-label" for="servicio_local">Local</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Internacional" id="servicio_internacional">
+                    <label class="form-check-label" for="servicio_internacional">Internacional</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Italiana" id="servicio_italiana">
+                    <label class="form-check-label" for="servicio_italiana">Italiana</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Mexicana" id="servicio_mexicana">
+                    <label class="form-check-label" for="servicio_mexicana">Mexicana</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Asiatica" id="servicio_asiatica">
+                    <label class="form-check-label" for="servicio_asiatica">Asiática</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Fusion" id="servicio_fusion">
+                    <label class="form-check-label" for="servicio_fusion">Fusión</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="servicios_tipo" value="Otro" id="servicio_otro">
+                    <label class="form-check-label" for="servicio_otro">Otro</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Precios por persona por temporada -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="id_price_per_person_alta_alim" class="form-label">Precio por Persona - Temporada Alta</label>
+                <input type="number" class="form-control" id="id_price_per_person_alta_alim" name="price_per_person_alta_alim" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_per_person_media_alim" class="form-label">Precio por Persona - Temporada Media</label>
+                <input type="number" class="form-control" id="id_price_per_person_media_alim" name="price_per_person_media_alim" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_per_person_baja_alim" class="form-label">Precio por Persona - Temporada Baja</label>
+                <input type="number" class="form-control" id="id_price_per_person_baja_alim" name="price_per_person_baja_alim" step="0.01" placeholder="0.00">
+            </div>
+        </div>
+
+        <!-- Precios para grupos por temporada -->
+        <h6>Precios para Grupos por Temporada</h6>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="id_price_group_5_10_alta" class="form-label">5-10 personas - Alta</label>
+                <input type="number" class="form-control" id="id_price_group_5_10_alta" name="price_group_5_10_alta" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_5_10_media" class="form-label">5-10 personas - Media</label>
+                <input type="number" class="form-control" id="id_price_group_5_10_media" name="price_group_5_10_media" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_5_10_baja" class="form-label">5-10 personas - Baja</label>
+                <input type="number" class="form-control" id="id_price_group_5_10_baja" name="price_group_5_10_baja" step="0.01" placeholder="0.00">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="id_price_group_11_20_alta" class="form-label">11-20 personas - Alta</label>
+                <input type="number" class="form-control" id="id_price_group_11_20_alta" name="price_group_11_20_alta" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_11_20_media" class="form-label">11-20 personas - Media</label>
+                <input type="number" class="form-control" id="id_price_group_11_20_media" name="price_group_11_20_media" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_11_20_baja" class="form-label">11-20 personas - Baja</label>
+                <input type="number" class="form-control" id="id_price_group_11_20_baja" name="price_group_11_20_baja" step="0.01" placeholder="0.00">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="id_price_group_21_30_alta" class="form-label">21-30 personas - Alta</label>
+                <input type="number" class="form-control" id="id_price_group_21_30_alta" name="price_group_21_30_alta" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_21_30_media" class="form-label">21-30 personas - Media</label>
+                <input type="number" class="form-control" id="id_price_group_21_30_media" name="price_group_21_30_media" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_21_30_baja" class="form-label">21-30 personas - Baja</label>
+                <input type="number" class="form-control" id="id_price_group_21_30_baja" name="price_group_21_30_baja" step="0.01" placeholder="0.00">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="id_price_group_31_50_alta" class="form-label">31-50 personas - Alta</label>
+                <input type="number" class="form-control" id="id_price_group_31_50_alta" name="price_group_31_50_alta" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_31_50_media" class="form-label">31-50 personas - Media</label>
+                <input type="number" class="form-control" id="id_price_group_31_50_media" name="price_group_31_50_media" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_31_50_baja" class="form-label">31-50 personas - Baja</label>
+                <input type="number" class="form-control" id="id_price_group_31_50_baja" name="price_group_31_50_baja" step="0.01" placeholder="0.00">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="id_price_group_50_plus_alta" class="form-label">+50 personas - Alta</label>
+                <input type="number" class="form-control" id="id_price_group_50_plus_alta" name="price_group_50_plus_alta" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_50_plus_media" class="form-label">+50 personas - Media</label>
+                <input type="number" class="form-control" id="id_price_group_50_plus_media" name="price_group_50_plus_media" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-md-4">
+                <label for="id_price_group_50_plus_baja" class="form-label">+50 personas - Baja</label>
+                <input type="number" class="form-control" id="id_price_group_50_plus_baja" name="price_group_50_plus_baja" step="0.01" placeholder="0.00">
+            </div>
+        </div>
+
+        <!-- Opciones dietéticas -->
+        <div class="mb-3">
+            <label class="form-label">Opciones Dietéticas</label>
+            <div id="dietary-options-container">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="dietary_options" value="Vegetariano" id="diet_vegetariano">
+                    <label class="form-check-label" for="diet_vegetariano">Vegetariano</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="dietary_options" value="Vegano" id="diet_vegano">
+                    <label class="form-check-label" for="diet_vegano">Vegano</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="dietary_options" value="Sin Gluten" id="diet_sin_gluten">
+                    <label class="form-check-label" for="diet_sin_gluten">Sin Gluten</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="dietary_options" value="Halal" id="diet_halal">
+                    <label class="form-check-label" for="diet_halal">Halal</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="dietary_options" value="Kosher" id="diet_kosher">
+                    <label class="form-check-label" for="diet_kosher">Kosher</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="dietary_options" value="Sin Lactosa" id="diet_sin_lactosa">
+                    <label class="form-check-label" for="diet_sin_lactosa">Sin Lactosa</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="dietary_options" value="Otro" id="diet_otro">
+                    <label class="form-check-label" for="diet_otro">Otro</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="id_other_dietary_options" class="form-label">Especificar Otras Opciones Dietéticas</label>
+            <input type="text" class="form-control" id="id_other_dietary_options" name="other_dietary_options" placeholder="Especifique otras opciones dietéticas">
+        </div>
+
+        <!-- Opciones especiales -->
+        <h6>Opciones Especiales</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="opcion_vvegana_disponible" value="1" id="opcion_vvegana">
+                    <label class="form-check-label" for="opcion_vvegana">Opción Vegana Disponible</label>
+                </div>
+                <div id="opcion_vvegana_detalle" style="display:none;">
+                    <textarea class="form-control mb-2" name="opcion_vvegana_descripcion" rows="2" placeholder="Descripción de la opción vegana"></textarea>
+                    <input type="number" class="form-control" name="opcion_vvegana_precio_adicional" step="0.01" placeholder="Precio adicional">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="opcion_vegetariana_disponible" value="1" id="opcion_vegetariana">
+                    <label class="form-check-label" for="opcion_vegetariana">Opción Vegetariana Disponible</label>
+                </div>
+                <div id="opcion_vegetariana_detalle" style="display:none;">
+                    <textarea class="form-control mb-2" name="opcion_vegetariana_descripcion" rows="2" placeholder="Descripción de la opción vegetariana"></textarea>
+                    <input type="number" class="form-control" name="opcion_vegetariana_precio_adicional" step="0.01" placeholder="Precio adicional">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="opcion_sin_gluten_disponible" value="1" id="opcion_sin_gluten">
+                    <label class="form-check-label" for="opcion_sin_gluten">Opción Sin Gluten Disponible</label>
+                </div>
+                <div id="opcion_sin_gluten_detalle" style="display:none;">
+                    <textarea class="form-control mb-2" name="opcion_sin_gluten_descripcion" rows="2" placeholder="Descripción de la opción sin gluten"></textarea>
+                    <input type="number" class="form-control" name="opcion_sin_gluten_precio_adicional" step="0.01" placeholder="Precio adicional">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="opcion_mariscos_disponible" value="1" id="opcion_mariscos">
+                    <label class="form-check-label" for="opcion_mariscos">Opción de Mariscos Disponible</label>
+                </div>
+                <div id="opcion_mariscos_detalle" style="display:none;">
+                    <textarea class="form-control mb-2" name="opcion_mariscos_descripcion" rows="2" placeholder="Descripción de la opción de mariscos"></textarea>
+                    <input type="number" class="form-control" name="opcion_mariscos_precio_adicional" step="0.01" placeholder="Precio adicional">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="opcion_gastronomia_local_disponible" value="1" id="opcion_gast_local">
+                    <label class="form-check-label" for="opcion_gast_local">Opción de Gastronomía Local Disponible</label>
+                </div>
+                <div id="opcion_gast_local_detalle" style="display:none;">
+                    <textarea class="form-control mb-2" name="opcion_gastronomia_local_descripcion" rows="2" placeholder="Descripción de la opción de gastronomía local"></textarea>
+                    <input type="number" class="form-control" name="opcion_gastronomia_local_precio_adicional" step="0.01" placeholder="Precio adicional">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="opcion_kosher_disponible" value="1" id="opcion_kosher">
+                    <label class="form-check-label" for="opcion_kosher">Opción Kosher Disponible</label>
+                </div>
+                <div id="opcion_kosher_detalle" style="display:none;">
+                    <textarea class="form-control mb-2" name="opcion_kosher_descripcion" rows="2" placeholder="Descripción de la opción kosher"></textarea>
+                    <input type="number" class="form-control" name="opcion_kosher_precio_adicional" step="0.01" placeholder="Precio adicional">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="opcion_halal_disponible" value="1" id="opcion_halal">
+                    <label class="form-check-label" for="opcion_halal">Opción Halal Disponible</label>
+                </div>
+                <div id="opcion_halal_detalle" style="display:none;">
+                    <textarea class="form-control mb-2" name="opcion_halal_descripcion" rows="2" placeholder="Descripción de la opción halal"></textarea>
+                    <input type="number" class="form-control" name="opcion_halal_precio_adicional" step="0.01" placeholder="Precio adicional">
+                </div>
+            </div>
+        </div>
+
+        <!-- Otros campos -->
+        <div class="mb-3">
+            <label for="id_observaciones_alim" class="form-label">Observaciones</label>
+            <textarea class="form-control" id="id_observaciones_alim" name="observaciones_alim" rows="2" placeholder="Observaciones adicionales"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="id_horariosServicio" class="form-label">Horarios de Servicio</label>
+            <input type="text" class="form-control" id="id_horariosServicio" name="horariosServicio" placeholder="Horarios de servicio">
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="incluyePropinas" value="1" id="id_incluyePropinas">
+            <label class="form-check-label" for="id_incluyePropinas">Incluye Propinas</label>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+        // Sistema de calificación con estrellas y funcionalidades adicionales
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funcionalidad de cascada para ubicación
+            const paisSelect = document.getElementById('id_pais');
+            const departamentoSelect = document.getElementById('id_departamento');
+            const municipioSelect = document.getElementById('id_municipio');
+
+            // Definir departamentos y municipios de Colombia (una lista simplificada)
+            const departamentosMunicipios = {
+                'Amazonas': ['Leticia', 'Puerto Nariño'],
+                'Antioquia': ['Medellín', 'Bello', 'Itagüí', 'Envigado', 'Rionegro', 'Caldas', 'Sabaneta', 'Girardota', 'Copacabana'],
+                'Arauca': ['Arauca'],
+                'Atlántico': ['Barranquilla', 'Soledad', 'Malambo', 'Sabanalarga'],
+                'Bolívar': ['Cartagena', 'Magangué', 'Carmen de Bolívar', 'Arjona'],
+                'Boyacá': ['Tunja', 'Duitama', 'Sogamoso', 'Chiquinquirá'],
+                'Caldas': ['Manizales', 'Villamaría', 'Chinchiná', 'La Dorada'],
+                'Caquetá': ['Florencia', 'San Vicente del Caguán', 'Morelia', 'Milán'],
+                'Casanare': ['Yopal', 'Aguazul', 'Chámeza', 'Maní'],
+                'Cauca': ['Popayán', 'Santander de Quilichao', 'Cajibío', 'El Tambo'],
+                'Cesar': ['Valledupar', 'Aguachica', 'Gamarra', 'Pueblo Bello'],
+                'Chocó': ['Quibdó', 'Condoto', 'Riosucio', 'Istmina'],
+                'Córdoba': ['Montería', 'Cereté', 'Planeta Rica', 'Tierralta'],
+                'Cundinamarca': ['Bogotá', 'Soacha', 'Chía', 'Facatativá', 'Funza'],
+                'Guainía': ['Inírida'],
+                'Guaviare': ['San José del Guaviare'],
+                'Huila': ['Neiva', 'Pitalito', 'Garzón', 'La Plata'],
+                'La Guajira': ['Riohacha', 'Uribia', 'Maicao', 'Fonseca'],
+                'Magdalena': ['Santa Marta', 'Ciénaga', 'Barranquilla', 'Aracataca'],
+                'Meta': ['Villavicencio', 'Granada', 'Acacías', 'Puerto López'],
+                'Nariño': ['Pasto', 'Tumaco', 'Ipiales', 'Túquerres'],
+                'Norte de Santander': ['Cúcuta', 'Pamplona', 'Ocaña', 'Villa del Rosario'],
+                'Putumayo': ['Mocoa', 'Colón', 'Orito', 'Valle del Guamuez'],
+                'Quindío': ['Armenia', 'Calarcá', 'Circasia', 'Montenegro'],
+                'Risaralda': ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal', 'Apía'],
+                'San Andrés y Providencia': ['San Andrés'],
+                'Santander': ['Bucaramanga', 'Floridablanca', 'Girón', 'Piedecuesta'],
+                'Sucre': ['Sincelejo', 'Corozal', 'Sampués', 'Tolu'],
+                'Tolima': ['Ibagué', 'Espinal', 'Mariquita', 'Chaparral'],
+                'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura', 'Tuluá'],
+                'Vaupés': ['Mitú'],
+                'Vichada': ['Puerto Carreño']
+            };
+
+            // Función para llenar los departamentos
+            function populateDepartamentos() {
+                if (!departamentoSelect) return;
+                // Limpiar departamentos y municipios
+                departamentoSelect.innerHTML = '<option value="">Selecciona un departamento</option>';
+                municipioSelect.innerHTML = '<option value="">Selecciona un municipio</option>';
+
+                // Si el país es Colombia, cargar departamentos
+                if (paisSelect.value === 'Colombia') {
+                    for (const dept in departamentosMunicipios) {
+                        const option = document.createElement('option');
+                        option.value = dept;
+                        option.textContent = dept;
+                        departamentoSelect.appendChild(option);
+                    }
+                }
+            }
+
+            // Función para llenar los municipios
+            function populateMunicipios() {
+                if (!municipioSelect) return;
+                // Limpiar municipios
+                municipioSelect.innerHTML = '<option value="">Selecciona un municipio</option>';
+
+                // Si hay un departamento seleccionado, cargar sus municipios
+                if (departamentoSelect.value) {
+                    const municipios = departamentosMunicipios[departamentoSelect.value];
+                    if (municipios) {
+                        municipios.forEach(municipio => {
+                            const option = document.createElement('option');
+                            option.value = municipio;
+                            option.textContent = municipio;
+                            municipioSelect.appendChild(option);
+                        });
+                    }
+                }
+            }
+
+            // Evento para cuando cambia el país
+            if (paisSelect) {
+                paisSelect.addEventListener('change', function() {
+                    populateDepartamentos();
+                });
+            }
+
+            // Evento para cuando cambia el departamento
+            if (departamentoSelect) {
+                departamentoSelect.addEventListener('change', function() {
+                    populateMunicipios();
+                });
+            }
+
+            // Sistema de calificación con estrellas
+            const stars = document.querySelectorAll('.star');
+            const ratingInput = document.getElementById('id_calificacion');
+            const ratingText = document.getElementById('rating-text');
+
+            // Cargar la calificación inicial
+            const initialRating = parseFloat(ratingInput.value) || 0;
+            updateStars(initialRating);
+
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = parseFloat(this.getAttribute('data-value'));
+                    ratingInput.value = value;
+                    updateStars(value);
+                    ratingText.textContent = `(${value}/5)`;
+                });
+
+                star.addEventListener('mouseover', function() {
+                    const value = parseFloat(this.getAttribute('data-value'));
+                    highlightStars(value);
+                });
+
+                star.addEventListener('mouseout', function() {
+                    const currentRating = parseFloat(ratingInput.value) || 0;
+                    updateStars(currentRating);
+                });
+            });
+
+            function updateStars(rating) {
+                stars.forEach(star => {
+                    const starValue = parseFloat(star.getAttribute('data-value'));
+                    if (starValue <= rating) {
+                        star.textContent = '★';
+                        star.style.color = '#ffc107';
+                    } else {
+                        star.textContent = '☆';
+                        star.style.color = '#ccc';
+                    }
+                });
+            }
+
+            function highlightStars(rating) {
+                stars.forEach(star => {
+                    const starValue = parseFloat(star.getAttribute('data-value'));
+                    if (starValue <= rating) {
+                        star.textContent = '★';
+                        star.style.color = '#ffdd40';
+                    } else {
+                        star.textContent = '☆';
+                        star.style.color = '#ccc';
+                    }
+                });
+            }
+
+            // Funcionalidad para mostrar/ocultar formulario de alimentación cuando se marca restaurante
+            const restauranteCheckbox = document.getElementById('id_restaurante');
+            const formularioAlimentacion = document.getElementById('formulario-alimentacion');
+
+            if (restauranteCheckbox) {
+                restauranteCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        formularioAlimentacion.style.display = 'block';
+                    } else {
+                        formularioAlimentacion.style.display = 'none';
+                    }
+                });
+
+                // Mostrar el formulario si ya está marcado (caso de edición)
+                if (restauranteCheckbox.checked) {
+                    formularioAlimentacion.style.display = 'block';
+                }
+            }
+
+            // Funcionalidad para mostrar/ocultar campo de tipo de barra cuando se marca bar
+            const barCheckbox = document.getElementById('id_bar');
+            const barSection = document.getElementById('bar-section');
+
+            if (barCheckbox) {
+                barCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        barSection.style.display = 'block';
+                    } else {
+                        barSection.style.display = 'none';
+                    }
+                });
+
+                // Mostrar el campo si ya está marcado (caso de edición)
+                if (barCheckbox.checked) {
+                    barSection.style.display = 'block';
+                }
+            }
+
+            // Funcionalidad para mostrar/ocultar detalles de opciones especiales
+            const opcionVeganaCheckbox = document.getElementById('opcion_vvegana');
+            const opcionVeganaDetalle = document.getElementById('opcion_vvegana_detalle');
+
+            if (opcionVeganaCheckbox && opcionVeganaDetalle) {
+                opcionVeganaCheckbox.addEventListener('change', function() {
+                    opcionVeganaDetalle.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            const opcionVegetarianaCheckbox = document.getElementById('opcion_vegetariana');
+            const opcionVegetarianaDetalle = document.getElementById('opcion_vegetariana_detalle');
+
+            if (opcionVegetarianaCheckbox && opcionVegetarianaDetalle) {
+                opcionVegetarianaCheckbox.addEventListener('change', function() {
+                    opcionVegetarianaDetalle.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            const opcionSinGlutenCheckbox = document.getElementById('opcion_sin_gluten');
+            const opcionSinGlutenDetalle = document.getElementById('opcion_sin_gluten_detalle');
+
+            if (opcionSinGlutenCheckbox && opcionSinGlutenDetalle) {
+                opcionSinGlutenCheckbox.addEventListener('change', function() {
+                    opcionSinGlutenDetalle.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            const opcionMariscosCheckbox = document.getElementById('opcion_mariscos');
+            const opcionMariscosDetalle = document.getElementById('opcion_mariscos_detalle');
+
+            if (opcionMariscosCheckbox && opcionMariscosDetalle) {
+                opcionMariscosCheckbox.addEventListener('change', function() {
+                    opcionMariscosDetalle.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            const opcionGastLocalCheckbox = document.getElementById('opcion_gast_local');
+            const opcionGastLocalDetalle = document.getElementById('opcion_gast_local_detalle');
+
+            if (opcionGastLocalCheckbox && opcionGastLocalDetalle) {
+                opcionGastLocalCheckbox.addEventListener('change', function() {
+                    opcionGastLocalDetalle.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            const opcionKosherCheckbox = document.getElementById('opcion_kosher');
+            const opcionKosherDetalle = document.getElementById('opcion_kosher_detalle');
+
+            if (opcionKosherCheckbox && opcionKosherDetalle) {
+                opcionKosherCheckbox.addEventListener('change', function() {
+                    opcionKosherDetalle.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            const opcionHalalCheckbox = document.getElementById('opcion_halal');
+            const opcionHalalDetalle = document.getElementById('opcion_halal_detalle');
+
+            if (opcionHalalCheckbox && opcionHalalDetalle) {
+                opcionHalalCheckbox.addEventListener('change', function() {
+                    opcionHalalDetalle.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            // Funcionalidad para agregar tipos de habitación
+            const addHabitacionBtn = document.getElementById('add-habitacion-btn');
+            const habitacionesContainer = document.getElementById('habitaciones-container');
+
+            addHabitacionBtn.addEventListener('click', function() {
+                const habitacionIndex = habitacionesContainer.children.length;
+                const habitacionHtml = `
+                    <div class="habitacion-card mb-3 p-3 border rounded" data-index="${habitacionIndex}">
+                        <h6>Tipo de Habitación #${habitacionIndex + 1}</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre del Tipo</label>
+                                <input type="text" class="form-control habitacion-nombre" placeholder="Ej: Individual, Doble, Suite, etc.">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Capacidad (pax)</label>
+                                <input type="number" class="form-control habitacion-capacidad" min="1">
+                            </div>
+                        </div>
+
+                        <h6 class="mt-3">Precios por Temporada</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Temporada Alta</label>
+                                <input type="number" class="form-control precio-alta" step="0.01" min="0" placeholder="Precio">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Temporada Media</label>
+                                <input type="number" class="form-control precio-media" step="0.01" min="0" placeholder="Precio">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Temporada Baja</label>
+                                <input type="number" class="form-control precio-baja" step="0.01" min="0" placeholder="Precio">
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-danger remove-habitacion">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+
+                habitacionesContainer.insertAdjacentHTML('beforeend', habitacionHtml);
+
+                // Agregar evento para eliminar la habitación
+                const removeBtn = habitacionesContainer.lastElementChild.querySelector('.remove-habitacion');
+                removeBtn.addEventListener('click', function() {
+                    this.closest('.habitacion-card').remove();
+                    updateHabitacionesInfo();
+                });
+            });
+
+            // Actualizar información de habitaciones cada vez que cambie
+            habitacionesContainer.addEventListener('input', function(e) {
+                if (e.target.classList.contains('habitacion-nombre') ||
+                    e.target.classList.contains('habitacion-capacidad') ||
+                    e.target.classList.contains('precio-alta') ||
+                    e.target.classList.contains('precio-media') ||
+                    e.target.classList.contains('precio-baja')) {
+                    updateHabitacionesInfo();
+                }
+            });
+
+            function updateHabitacionesInfo() {
+                const habitaciones = [];
+                const habitacionCards = document.querySelectorAll('.habitacion-card');
+
+                habitacionCards.forEach(card => {
+                    const nombre = card.querySelector('.habitacion-nombre').value;
+                    const capacidad = card.querySelector('.habitacion-capacidad').value;
+                    const precioAlta = card.querySelector('.precio-alta').value;
+                    const precioMedia = card.querySelector('.precio-media').value;
+                    const precioBaja = card.querySelector('.precio-baja').value;
+
+                    if (nombre || capacidad || precioAlta || precioMedia || precioBaja) {
+                        habitaciones.push({
+                            nombre: nombre,
+                            capacidad: capacidad ? parseInt(capacidad) : null,
+                            precios: {
+                                alta: precioAlta ? parseFloat(precioAlta) : 0,
+                                media: precioMedia ? parseFloat(precioMedia) : 0,
+                                baja: precioBaja ? parseFloat(precioBaja) : 0
+                            }
+                        });
+                    }
+                });
+
+                document.getElementById('id_habitaciones_info').value = JSON.stringify(habitaciones);
+            }
+
+            // Cargar datos existentes si estamos editando
+            const existingHabitaciones = {{ form.instance.habitaciones_info_data|default:"[]"|safe }};
+            if (existingHabitaciones.length > 0) {
+                existingHabitaciones.forEach((habitacion, index) => {
+                    addHabitacionBtn.click(); // Agregar una nueva tarjeta
+                    const card = habitacionesContainer.lastElementChild;
+
+                    card.querySelector('.habitacion-nombre').value = habitacion.nombre || '';
+                    if (habitacion.capacidad) {
+                        card.querySelector('.habitacion-capacidad').value = habitacion.capacidad;
+                    }
+
+                    if (habitacion.precios) {
+                        card.querySelector('.precio-alta').value = habitacion.precios.alta || '';
+                        card.querySelector('.precio-media').value = habitacion.precios.media || '';
+                        card.querySelector('.precio-baja').value = habitacion.precios.baja || '';
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <style>
+        .star-rating {
+            display: inline-block;
+        }
+        
+        .stars-container {
+            display: inline-block;
+        }
+        
+        .star {
+            font-size: 2em;
+            margin: 0 2px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .habitacion-card {
+            background-color: #f8f9fa;
+        }
+    </style>
+{% endblock %}

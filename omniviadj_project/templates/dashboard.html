@@ -1,0 +1,569 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body_class %}dashboard-page{% endblock %}
+{% block extra_body_classes %}
+    {% if entidad_tipo == 'Operadora turística o agencia de viajes' %}
+        agency-background
+    {% elif entidad_tipo == 'Transporte' %}
+        transport-background
+    {% elif entidad_tipo == 'Alimentación' %}
+        alimentacion-background
+    {% elif entidad_tipo == 'Hospedaje' %}
+        hospedaje-background
+    {% elif entidad_tipo == 'Seguro' %}
+        seguro-background
+    {% else %}
+        home-background
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 profile-container">
+    <div class="profile-card glass-effect">
+        <h1>Bienvenido, {% if entidad_nombre %}{{ entidad_nombre }}{% else %}{{ user.username }}{% endif %}</h1>
+        <p>Este es tu panel de control {% if subcategoria %}como {{ subcategoria }}{% endif %}.</p>
+        
+        <div class="list-group mt-4">
+            <a href="{% url 'profile_update' %}" class="list-group-item list-group-item-action">
+                Actualizar Perfil y Logo
+            </a>
+            <a href="{% url 'data_entry' %}" class="list-group-item list-group-item-action">
+                Mis Servicios
+            </a>
+            {% if entidad_tipo == 'Operadora turística o agencia de viajes' %}
+            <a href="{% url 'quotation_form' %}" class="list-group-item list-group-item-action">
+                Crear Cotización
+            </a>
+            {% endif %}
+        </div>
+
+        <hr class="my-4">
+
+        {% if entidad_tipo == 'Transporte' %}
+        <div class="mt-4">
+            <h2>Gestionar Transportes</h2>
+
+            <!-- Sección de búsqueda y selección de transportes -->
+            <div class="mb-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <label for="transporte-select-dashboard" class="form-label">Seleccionar Transporte:</label>
+                        <select class="form-select" id="transporte-select-dashboard" name="transporte-select-dashboard">
+                            <option value="">Seleccione un transporte...</option>
+                            {% for transporte in transportes %}
+                            <option value="{{ transporte.pk }}">{{ transporte.get_modeloTransporte_display|default:transporte.tipoTransporte }} - {{ transporte.marca|default:"Sin marca" }} {{ transporte.modelo|default:"Sin modelo" }} ({{ transporte.matricula|default:"Sin matrícula" }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <a href="{% url 'transporte-crear' %}" class="btn btn-primary w-100">Ingresar Nuevo Transporte</a>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {% if entidad_tipo == 'Transporte' %}
+                        <a href="{% url 'ruta-transporte-crear' %}" class="btn btn-primary me-2">Crear Ruta de Transporte</a>
+                        <a href="{% url 'rutas-list' %}" class="btn btn-secondary me-2">Ver Rutas</a>
+                        <a href="{% url 'convenios-agencia-list' %}" class="btn btn-outline-primary">Ver Convenios con Agencias</a>
+                    {% elif entidad_tipo == 'Operadora turística o agencia de viajes' %}
+                        <a href="{% url 'convenios-agencia-list' %}" class="btn btn-outline-primary">Gestionar Convenios de Agencia</a>
+                    {% else %}
+                        <!-- No mostrar botón de convenios para otras entidades -->
+                    {% endif %}
+                </div>
+
+                <!-- Buscador para transportes -->
+                <div class="mb-3">
+                    <label for="search-input-transporte-dashboard" class="form-label">Buscar transporte:</label>
+                    <input type="text" class="form-control" id="search-input-transporte-dashboard" placeholder="Escriba para buscar...">
+                </div>
+            </div>
+
+            <!-- Contenedor para mostrar la tarjeta del transporte seleccionado -->
+            <div id="selected-transporte-card-container" class="mt-4">
+                <!-- La tarjeta del transporte seleccionado aparecerá aquí -->
+            </div>
+
+            {% if not transportes %}
+                <div class="alert alert-info">
+                    Aún no has agregado ningún transporte. <a href="{% url 'transporte-crear' %}" class="alert-link">¡Crea tu primer transporte aquí!</a>
+                </div>
+            {% endif %}
+        </div>
+        {% elif entidad_tipo == 'Operadora turística o agencia de viajes' %}
+        <div class="mt-4">
+            <h2>Gestionar Destinos</h2>
+
+            <!-- Sección de búsqueda y selección de destinos -->
+            <div class="mb-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <label for="destino-select-dashboard" class="form-label">Seleccionar Destino:</label>
+                        <select class="form-select" id="destino-select-dashboard" name="destino-select-dashboard">
+                            <option value="">Seleccione un destino...</option>
+                            {% for destino in destinos %}
+                            <option value="{{ destino.pk }}">{{ destino.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <a href="{% url 'destino-crear' %}" class="btn btn-primary w-100">Ingresar Nuevo Destino</a>
+                    </div>
+                </div>
+
+                <!-- Buscador para destinos -->
+                <div class="mb-3">
+                    <label for="search-input-dashboard" class="form-label">Buscar destino:</label>
+                    <input type="text" class="form-control" id="search-input-dashboard" placeholder="Escriba para buscar...">
+                </div>
+            </div>
+
+            <!-- Contenedor para mostrar la tarjeta del destino seleccionado -->
+            <div id="selected-destino-card-container" class="mt-4">
+                <!-- La tarjeta del destino seleccionado aparecerá aquí -->
+            </div>
+
+            {% if not destinos %}
+                <div class="alert alert-info">
+                    Aún no has agregado ningún destino. <a href="{% url 'destino-crear' %}" class="alert-link">¡Crea tu primer destino aquí!</a>
+                </div>
+            {% endif %}
+        </div>
+        {% elif entidad_tipo == 'Alimentación' %}
+        <div class="mt-4">
+            <h2>Gestionar Servicios de Alimentación</h2>
+
+            <div class="mb-4">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'alimentacion-crear' %}" class="btn btn-primary">Ingresar Nuevo Servicio de Alimentación</a>
+                </div>
+
+                {% if alimentacion_services %}
+                <div class="mt-3">
+                    <h5>Servicios registrados:</h5>
+                    <ul class="list-group">
+                        {% for servicio in alimentacion_services %}
+                        <li class="list-group-item">{{ servicio.nombre }} - {{ servicio.descripcion|truncatewords:10 }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <div class="alert alert-info mt-3">
+                    Aún no has agregado ningún servicio de alimentación. <a href="{% url 'alimentacion-crear' %}" class="alert-link">¡Crea tu primer servicio aquí!</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% elif entidad_tipo == 'Hospedaje' %}
+        <div class="mt-4">
+            <h2>Gestionar Hospedajes</h2>
+
+            <div class="mb-4">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'hospedaje-crear' %}" class="btn btn-primary">Ingresar Nuevo Hospedaje</a>
+                </div>
+
+                {% if hospedajes %}
+                <div class="mt-3">
+                    <h5>Hospedajes registrados:</h5>
+                    <ul class="list-group">
+                        {% for hospedaje in hospedajes %}
+                        <li class="list-group-item">{{ hospedaje.nombreLugar }} - {{ hospedaje.tipoHospedaje|default:"Sin tipo" }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <div class="alert alert-info mt-3">
+                    Aún no has agregado ningún hospedaje. <a href="{% url 'hospedaje-crear' %}" class="alert-link">¡Crea tu primer hospedaje aquí!</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% elif entidad_tipo == 'Seguro' %}
+        <div class="mt-4">
+            <h2>Gestionar Seguros</h2>
+
+            <div class="mb-4">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'seguro-crear' %}" class="btn btn-primary">Ingresar Nuevo Seguro</a>
+                </div>
+
+                {% if seguros %}
+                <div class="mt-3">
+                    <h5>Seguros registrados:</h5>
+                    <ul class="list-group">
+                        {% for seguro in seguros %}
+                        <li class="list-group-item">{{ seguro.nombre }} - {{ seguro.descripcion|truncatewords:10 }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <div class="alert alert-info mt-3">
+                    Aún no has agregado ningún seguro. <a href="{% url 'seguro-crear' %}" class="alert-link">¡Crea tu primer seguro aquí!</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+{{ destinos_json|json_script:"destinos-data-dashboard" }}
+{{ transportes_json|json_script:"transportes-data-dashboard" }}
+<script src="{% static 'js/destino_cards.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Obtener referencias a los elementos
+    const destinoSelect = document.getElementById('destino-select-dashboard');
+    const transporteSelect = document.getElementById('transporte-select-dashboard');
+    const searchInput = document.getElementById('search-input-dashboard');
+    const searchInputTransporte = document.getElementById('search-input-transporte-dashboard');
+    const destinoCardContainer = document.getElementById('selected-destino-card-container');
+    const transporteCardContainer = document.getElementById('selected-transporte-card-container');
+
+    // Crear contenedores para autocompletar
+    if (searchInput) {
+        const autocompleteContainer = document.createElement('div');
+        autocompleteContainer.id = 'autocomplete-list-dashboard';
+        autocompleteContainer.className = 'dropdown-menu autocomplete-dropdown';
+        autocompleteContainer.style = 'position: absolute; top: 100%; left: 0; z-index: 1000; display: none; width: 100%; max-height: 200px; overflow-y: auto; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);';
+        searchInput.parentNode.style.position = 'relative';
+        searchInput.parentNode.appendChild(autocompleteContainer);
+    }
+
+    if (searchInputTransporte) {
+        const autocompleteContainerTransporte = document.createElement('div');
+        autocompleteContainerTransporte.id = 'autocomplete-list-transporte-dashboard';
+        autocompleteContainerTransporte.className = 'dropdown-menu autocomplete-dropdown';
+        autocompleteContainerTransporte.style = 'position: absolute; top: 100%; left: 0; z-index: 1000; display: none; width: 100%; max-height: 200px; overflow-y: auto; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);';
+        searchInputTransporte.parentNode.style.position = 'relative';
+        searchInputTransporte.parentNode.appendChild(autocompleteContainerTransporte);
+    }
+
+    // Función para cargar y mostrar la tarjeta de un destino
+    function loadDestinoCard(destinoId) {
+        if (!destinoId) {
+            destinoCardContainer.innerHTML = '';
+            return;
+        }
+
+        fetch(`/api/destinos/${destinoId}/`)
+            .then(response => response.json())
+            .then(destino => {
+                // Formatear la información de actividades (atraactivos)
+                let actividadesHtml = '';
+                if (destino.actividades && destino.actividades.length > 0) {
+                    actividadesHtml = '<h6 class="mt-3">Atractivos y Costos:</h6><ul class="list-group list-group-flush">';
+                    destino.actividades.forEach(actividad => {
+                        actividadesHtml += `
+                            <li class="list-group-item">
+                                <strong>${actividad.atractivo_nombre || actividad.nombre || 'Atractivo'}</strong> (${actividad.tipo_costo || 'Tipo no especificado'})
+                                ${actividad.precios && actividad.precios.length > 0 ? `
+                                    <ul class="list-unstyled ms-3">
+                                        ${actividad.precios.map(precio => `
+                                            <li>${precio.categoria}: TA: ${precio.temporada_alta}, TM: ${precio.temporada_media}, TB: ${precio.temporada_baja}
+                                        `).join('')}
+                                    </ul>
+                                ` : ''}
+                            </li>
+                        `;
+                    });
+                    actividadesHtml += '</ul>';
+                }
+
+                // Mostrar imágenes si existen
+                let imagenesHtml = '';
+                if (destino.imagenes && destino.imagenes.length > 0) {
+                    imagenesHtml = '<div class="mt-2">';
+                    destino.imagenes.slice(0, 3).forEach((img, index) => {
+                        imagenesHtml += `<img src="${img}" alt="Imagen ${index + 1}" class="img-thumbnail me-1" style="max-height: 100px;">`;
+                    });
+                    if (destino.imagenes.length > 3) {
+                        imagenesHtml += `<small class="text-muted">+${destino.imagenes.length - 3} más</small>`;
+                    }
+                    imagenesHtml += '</div>';
+                }
+
+                const cardHtml = `
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${destino.nombre}</h5>
+                            <p class="card-text"><strong>Ubicación:</strong> ${destino.ubicacion}</p>
+                            <p class="card-text"><strong>Categoría:</strong> ${destino.get_categoria_display || destino.categoria}</p>
+                            <p class="card-text"><strong>Descripción:</strong><br>${destino.descripcion}</p>
+                            ${imagenesHtml}
+                            ${actividadesHtml}
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="/api/destino/${destino.id}/update/" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('destino', '${destino.nombre}', '/api/destino/${destino.id}/delete/', '{% url 'dashboard' %}')">Eliminar</a>
+                            <a href="/api/destino/${destino.id}/" class="btn btn-sm btn-outline-info">Ver</a>
+                        </div>
+                    </div>
+                `;
+                destinoCardContainer.innerHTML = cardHtml;
+            })
+            .catch(error => {
+                console.error('Error al cargar el destino:', error);
+                destinoCardContainer.innerHTML = '<div class="alert alert-danger">Error al cargar los datos del destino.</div>';
+            });
+    }
+
+    // Función para cargar y mostrar la tarjeta de un transporte
+    function loadTransporteCard(transporteId) {
+        if (!transporteId) {
+            transporteCardContainer.innerHTML = '';
+            return;
+        }
+
+        fetch(`/api/transportes/${transporteId}/`)
+            .then(response => response.json())
+            .then(transporte => {
+                // Mostrar imágenes si existen
+                let imagenHtml = '';
+                if (transporte.imagen) {
+                    imagenHtml = `<img src="${transporte.imagen}" class="card-img-top" alt="Imagen del vehículo" style="max-height: 150px; object-fit: cover;">`;
+                }
+
+                // Información adicional
+                const descripcionHtml = `
+                    <p class="card-text"><strong>Marca:</strong> ${transporte.marca || 'N/A'}</p>
+                    <p class="card-text"><strong>Modelo:</strong> ${transporte.modelo || 'N/A'}</p>
+                    <p class="card-text"><strong>Matrícula:</strong> ${transporte.matricula || 'N/A'}</p>
+                    <p class="card-text"><strong>Capacidad:</strong> ${transporte.pax || 'N/A'} pax</p>
+                    <p class="card-text"><strong>Tipo:</strong> ${transporte.tipoTransporte || 'N/A'}</p>
+                    <p class="card-text"><strong>Modelo vehículo:</strong> ${transporte.modeloTransporte || 'N/A'}</p>
+                `;
+
+                const cardHtml = `
+                    <div class="card h-100">
+                        ${imagenHtml}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${transporte.nombre || transporte.matricula || 'Transporte sin nombre'}</h5>
+                            ${descripcionHtml}
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="/api/transporte/${transporte.id}/update/" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('transporte', '${transporte.nombre || transporte.matricula || "Transporte"}', '/api/transporte/${transporte.id}/delete/', '{% url 'dashboard' %}')">Eliminar</a>
+                            <a href="/api/transporte/${transporte.id}/" class="btn btn-sm btn-outline-info">Ver</a>
+                        </div>
+                    </div>
+                `;
+                transporteCardContainer.innerHTML = cardHtml;
+            })
+            .catch(error => {
+                console.error('Error al cargar el transporte:', error);
+                transporteCardContainer.innerHTML = '<div class="alert alert-danger">Error al cargar los datos del transporte.</div>';
+            });
+    }
+
+    // Evento para el selector de destinos
+    if (destinoSelect) {
+        destinoSelect.addEventListener('change', function() {
+            const selectedDestinoId = this.value;
+            loadDestinoCard(selectedDestinoId);
+        });
+    }
+
+    // Evento para el selector de transportes
+    if (transporteSelect) {
+        transporteSelect.addEventListener('change', function() {
+            const selectedTransporteId = this.value;
+            loadTransporteCard(selectedTransporteId);
+        });
+    }
+
+    // Funcionalidad de autocompletar para destinos
+    if (searchInput) {
+        let timeout;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const query = this.value.trim();
+
+            if (query.length === 0) {
+                document.getElementById('autocomplete-list-dashboard').style.display = 'none';
+                destinoCardContainer.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                // Hacer la búsqueda para autocompletar
+                fetch(`/api/search-destinations-packages/?q=${encodeURIComponent(query)}`)
+                    .then(response => {
+                        // Verificar si la respuesta es correcta
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        // Verificar que la respuesta sea JSON
+                        const contentType = response.headers.get("content-type");
+                        if (!contentType || !contentType.includes("application/json")) {
+                            throw new Error("Response is not JSON");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Verificar que los datos tengan la estructura esperada
+                        if (data.error) {
+                            console.error('Error en la API:', data.error);
+                            return;
+                        }
+
+                        // Filtrar solo destinos para el dashboard
+                        const destinoResults = data.destinos.map(d => ({...d, tipo: 'destino'}));
+
+                        // Mostrar sugerencias para destinos
+                        showAutocompleteSuggestions(destinoResults, 'autocomplete-list-dashboard', loadDestinoCard);
+                    })
+                    .catch(error => {
+                        console.error('Error en la búsqueda de autocompletar:', error);
+                        // Ocultar el contenedor de autocompletar en caso de error
+                        document.getElementById('autocomplete-list-dashboard').style.display = 'none';
+                    });
+            }, 300); // Retraso menor para respuesta más rápida
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                document.getElementById('autocomplete-list-dashboard').style.display = 'block';
+            }
+        });
+
+        searchInput.addEventListener('blur', function() {
+            setTimeout(() => {
+                document.getElementById('autocomplete-list-dashboard').style.display = 'none';
+            }, 150);
+        });
+    }
+
+    // Funcionalidad de autocompletar para transportes
+    if (searchInputTransporte) {
+        let timeout;
+
+        searchInputTransporte.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const query = this.value.trim();
+
+            if (query.length === 0) {
+                document.getElementById('autocomplete-list-transporte-dashboard').style.display = 'none';
+                transporteCardContainer.innerHTML = '';
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                // Hacer la búsqueda para autocompletar transportes
+                fetch(`/api/autocomplete-transportes/?q=${encodeURIComponent(query)}`)
+                    .then(response => {
+                        // Verificar si la respuesta es correcta
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        // Verificar que la respuesta sea JSON
+                        const contentType = response.headers.get("content-type");
+                        if (!contentType || !contentType.includes("application/json")) {
+                            throw new Error("Response is not JSON");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Verificar que los datos tengan la estructura esperada
+                        if (!data.success) {
+                            console.error('Error en la API de transportes:', data.message || 'Datos no válidos');
+                            return;
+                        }
+
+                        // Mostrar sugerencias para transportes
+                        showAutocompleteSuggestions(data.transportes, 'autocomplete-list-transporte-dashboard', loadTransporteCard);
+                    })
+                    .catch(error => {
+                        console.error('Error en la búsqueda de autocompletar de transportes:', error);
+                        // Ocultar el contenedor de autocompletar en caso de error
+                        document.getElementById('autocomplete-list-transporte-dashboard').style.display = 'none';
+                    });
+            }, 200); // Retraso menor para respuesta más rápida
+        });
+
+        searchInputTransporte.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                document.getElementById('autocomplete-list-transporte-dashboard').style.display = 'block';
+            }
+        });
+
+        searchInputTransporte.addEventListener('blur', function() {
+            setTimeout(() => {
+                document.getElementById('autocomplete-list-transporte-dashboard').style.display = 'none';
+            }, 150);
+        });
+    }
+
+    // Función para mostrar sugerencias de autocompletar genérica
+    function showAutocompleteSuggestions(suggestions, containerId, loadFunction) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (suggestions.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        suggestions.forEach((suggestion, index) => {
+            const item = document.createElement('div');
+            item.className = 'dropdown-item autocomplete-item';
+            item.style = 'padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid #eee;';
+            item.innerHTML = suggestion.nombre;
+
+            // Destacar la parte que coincide con la búsqueda
+            const query = document.getElementById(containerId.replace('autocomplete-list-', 'search-input-')).value.toLowerCase();
+            if (query) {
+                const regex = new RegExp(`(${query})`, 'gi');
+                item.innerHTML = suggestion.nombre.replace(regex, '<strong>$1</strong>');
+            }
+
+            item.addEventListener('click', function() {
+                document.getElementById(containerId.replace('autocomplete-', 'search-input-')).value = suggestion.nombre;
+                container.style.display = 'none';
+                // Seleccionar directamente el ítem
+                if (suggestion.tipo === 'destino') {
+                    selectItem('destino', suggestion.id);
+                } else if (suggestion.tipo === 'transporte') {
+                    selectItem('transporte', suggestion.id);
+                } else {
+                    // Si no tiene tipo específico, buscarlo en el selector correspondiente
+                    if (containerId.includes('transporte')) {
+                        transporteSelect.value = suggestion.id;
+                        loadTransporteCard(suggestion.id);
+                    } else {
+                        destinoSelect.value = suggestion.id;
+                        loadDestinoCard(suggestion.id);
+                    }
+                }
+            });
+
+            container.appendChild(item);
+        });
+
+        container.style.display = 'block';
+    }
+
+    // Función para seleccionar un ítem desde los resultados de búsqueda
+    window.selectItem = function(itemType, itemId) {
+        if (itemType === 'destino') {
+            if (destinoSelect) destinoSelect.value = itemId;
+            loadDestinoCard(itemId);
+        } else if (itemType === 'transporte') {
+            if (transporteSelect) transporteSelect.value = itemId;
+            loadTransporteCard(itemId);
+        }
+    };
+});
+</script>
+{% endblock %}

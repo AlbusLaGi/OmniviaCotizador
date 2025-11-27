@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Registro Exitoso</h2>
+    <p>Su registro ha sido procesado exitosamente.</p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    alert('¡Bienvenido! Su registro ha sido exitoso.');
+    // Optionally, redirect to another page after the alert
+    // window.location.href = '{% url "home" %}'; 
+});
+</script>
+{% endblock %}

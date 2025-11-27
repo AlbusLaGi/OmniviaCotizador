@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cotizador OmniviaDJ{% endblock %}</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            background: url('{{ background_image_url }}') no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Estilos para fondos específicos según tipo de entidad - tienen prioridad con !important */
+        body.agency-background {
+            background: url('{% static "images/agency_background.jpg" %}?v={% now "U" %}') no-repeat center center fixed !important;
+            -webkit-background-size: cover !important;
+            -moz-background-size: cover !important;
+            -o-background-size: cover !important;
+            background-size: cover !important;
+        }
+
+        body.transport-background {
+            background: url('{% static "images/trans-background.webp" %}?v={% now "U" %}') no-repeat center center fixed !important;
+            -webkit-background-size: cover !important;
+            -moz-background-size: cover !important;
+            -o-background-size: cover !important;
+            background-size: cover !important;
+        }
+
+        body.alimentacion-background {
+            background: url('{% static "images/rest_background.webp" %}?v={% now "U" %}') no-repeat center center fixed !important;
+            -webkit-background-size: cover !important;
+            -moz-background-size: cover !important;
+            -o-background-size: cover !important;
+            background-size: cover !important;
+        }
+
+        body.hospedaje-background {
+            background: url('{% static "images/hosp_background.webp" %}?v={% now "U" %}') no-repeat center center fixed !important;
+            -webkit-background-size: cover !important;
+            -moz-background-size: cover !important;
+            -o-background-size: cover !important;
+            background-size: cover !important;
+        }
+
+        body.seguro-background {
+            background: url('{% static "images/seguro_background.webp" %}?v={% now "U" %}') no-repeat center center fixed !important;
+            -webkit-background-size: cover !important;
+            -moz-background-size: cover !important;
+            -o-background-size: cover !important;
+            background-size: cover !important;
+        }
+
+        body.home-background {
+            background: url('{% static "images/home_background.jpg" %}?v={% now "U" %}') no-repeat center center fixed !important;
+            -webkit-background-size: cover !important;
+            -moz-background-size: cover !important;
+            -o-background-size: cover !important;
+            background-size: cover !important;
+        }
+    </style>
+</head>
+<body class="{% block body_class %}{% endblock %} {% block extra_body_classes %}{% endblock %}">
+    {% block navbar %}
+    <nav class="navbar navbar-{{ entidad.tipo_entidad|slugify }}">
+        <div class="nav-logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'images/LogoOmnivia.webp' %}" alt="Logo" class="logo-img">
+                <span class="logo-text">Omnivia</span>
+            </a>
+        </div>
+        <div class="nav-items">
+            {% if user.is_authenticated %}
+                <a class="nav-link" href="{% url 'dashboard' %}">Inicio</a>
+                <a class="nav-link" href="{% url 'profile_update' %}">Mi perfil</a>
+                <a class="nav-link" href="{% url 'data_entry' %}">Mis servicios</a>
+                {% if entidad_tipo == 'Operadora turística o agencia de viajes' %}
+                <a class="nav-link" href="{% url 'quotation_form' %}">Cotizar</a>
+                {% endif %}
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link btn btn-link" style="color: inherit; text-decoration: none;">Cerrar Sesión ({{ user.username }})</button>
+                </form>
+            {% else %}
+                <a class="nav-link" data-bs-toggle="modal" data-bs-target="#loginModal" href="#">Iniciar Sesión</a>
+                <a class="nav-link" data-bs-toggle="modal" data-bs-target="#registrationModal" href="#">Registrarse</a>
+            {% endif %}
+        </div>
+        <div class="nav-toggle">
+            <div class="bar"></div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <div style="position: relative;">
+        {% if entidad_logo_url %}
+            <img src="{{ entidad_logo_url }}" alt="Logo de la Empresa" style="position: absolute; top: 10px; right: 20px; max-height: 60px; width: auto; z-index: 1000;">
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Logout Success Modal -->
+    <div class="modal fade" id="logoutSuccessModal" tabindex="-1" aria-labelledby="logoutSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutSuccessModalLabel">Sesión Finalizada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Tu sesión ha finalizado exitosamente.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navItems = document.querySelector('.nav-items');
+
+            if (navToggle && navItems) {
+                navToggle.addEventListener('click', function() {
+                    navItems.classList.toggle('open');
+                    navToggle.classList.toggle('open');
+                });
+            }
+        });
+    </script>
+    {% block extra_js %}
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/registration.js' %}"></script>
+    <script src="{% static 'js/form_helpers.js' %}"></script>
+
+    <!-- Modal de Confirmación de Eliminación reusable -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro de que desea eliminar <strong id="item-name"></strong>? Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token CSRF para AJAX -->
+    {% csrf_token %}
+
+    <script>
+    function showDeleteConfirmation(itemType, itemName, deleteUrl, redirectUrl) {
+        // Actualizar el mensaje con el nombre del ítem
+        document.getElementById('item-name').textContent = itemName;
+
+        // Configurar el botón de confirmación para realizar la eliminación
+        document.getElementById('confirm-delete-btn').onclick = function() {
+            // Obtener CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                             getCookie('csrftoken') ||
+                             document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Redirigir después de eliminar exitosamente
+                    window.location.href = redirectUrl;
+                } else {
+                    // Manejar errores
+                    alert('Hubo un error al eliminar el ítem.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Hubo un error al eliminar el ítem.');
+            });
+        };
+
+        // Mostrar el modal
+        var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        modal.show();
+    }
+
+    // Función para obtener CSRF token de cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+
+    {% endblock %}
+
+    <!-- Registration Modal -->
+    <div class="modal fade" id="registrationModal" tabindex="-1" aria-labelledby="registrationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registrationModalLabel">Llena los campos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registrationForm" method="post" action="{% url 'entidad-registro' %}">
+                        {% csrf_token %}
+                        <div id="registration-error" class="alert alert-danger" style="display: none;"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.nombre.id_for_label }}" class="form-label">{{ registration_form.nombre.label }}</label>
+                                {{ registration_form.nombre }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.tipo_persona.id_for_label }}" class="form-label">{{ registration_form.tipo_persona.label }}</label>
+                                {{ registration_form.tipo_persona }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.tipo_entidad.id_for_label }}" class="form-label">{{ registration_form.tipo_entidad.label }}</label>
+                                {{ registration_form.tipo_entidad }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3" id="otroTipoEntidadWrapperReg" style="display: none;">
+                                <label for="{{ registration_form.otro_tipo_entidad.id_for_label }}" class="form-label">{{ registration_form.otro_tipo_entidad.label }}</label>
+                                {{ registration_form.otro_tipo_entidad }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ registration_form.subcategoria.id_for_label }}" class="form-label">{{ registration_form.subcategoria.label }}</label>
+                            {{ registration_form.subcategoria }}
+                            <datalist id="subcategoria-list"></datalist>
+                            <small class="form-field-note">Refieren actividades turísticas específicas pertenecientes a la actividad genérica, ej.: agencia de viajes y turismo, agencia de viajes mayorista, hotel, apartahotel, restaurante, transportadora, glamping, eco hotel, entre otros.</small>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.tipo_documento.id_for_label }}" class="form-label">{{ registration_form.tipo_documento.label }}</label>
+                                {{ registration_form.tipo_documento }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.nit.id_for_label }}" class="form-label">{{ registration_form.nit.label }}</label>
+                                {{ registration_form.nit }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.rnt.id_for_label }}" class="form-label">{{ registration_form.rnt.label }}</label>
+                                {{ registration_form.rnt }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ registration_form.pais.id_for_label }}" class="form-label">{{ registration_form.pais.label }}</label>
+                                {{ registration_form.pais }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ registration_form.departamento.id_for_label }}" class="form-label">{{ registration_form.departamento.label }}</label>
+                                {{ registration_form.departamento }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ registration_form.municipio.id_for_label }}" class="form-label">{{ registration_form.municipio.label }}</label>
+                                {{ registration_form.municipio }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.direccion.id_for_label }}" class="form-label">{{ registration_form.direccion.label }}</label>
+                                {{ registration_form.direccion }}
+                                <small class="form-field-note">Ej: Calle 16 #23-52</small>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.barrio.id_for_label }}" class="form-label">{{ registration_form.barrio.label }}</label>
+                                {{ registration_form.barrio }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ registration_form.observacion.id_for_label }}" class="form-label">Observación dirección</label>
+                            {{ registration_form.observacion }}
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ registration_form.caracteristicas.id_for_label }}" class="form-label">{{ registration_form.caracteristicas.label }}</label>
+                            {{ registration_form.caracteristicas }}
+                            <small class="form-field-note">Una breve descripción de tu servicio</small>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ registration_form.mail.id_for_label }}" class="form-label">{{ registration_form.mail.label }}</label>
+                            {{ registration_form.mail }}
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.username.id_for_label }}" class="form-label">{{ registration_form.username.label }}</label>
+                                {{ registration_form.username }}
+                                <div id="username-feedback-reg" class="form-text"></div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.password.id_for_label }}" class="form-label">{{ registration_form.password.label }}</label>
+                                {{ registration_form.password }}
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ registration_form.password2.id_for_label }}" class="form-label">{{ registration_form.password2.label }}</label>
+                                <div class="input-group">
+                                    {{ registration_form.password2 }}
+                                    <span class="input-group-text" id="password-match-feedback-reg"></span>
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Registrarse</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Iniciar Sesión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm" method="post" action="{% url 'ajax_login' %}">
+                        {% csrf_token %}
+                        <div id="login-error" class="alert alert-danger" style="display: none;"></div>
+                        <div class="mb-3">
+                            <label for="id_username_modal" class="form-label">Nombre de usuario</label>
+                            <input type="text" name="username" class="form-control" id="id_username_modal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password_modal" class="form-label">Contraseña</label>
+                            <input type="password" name="password" class="form-control" id="id_password_modal" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                    </form>
+
+                    <script>
+                    document.getElementById('loginForm').addEventListener('submit', function(e) {
+                        e.preventDefault();
+
+                        const formData = new FormData(this);
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                        fetch('{% url "ajax_login" %}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                document.getElementById('login-error').textContent = data.error;
+                                document.getElementById('login-error').style.display = 'block';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            document.getElementById('login-error').textContent = 'Ocurrió un error al procesar la solicitud';
+                            document.getElementById('login-error').style.display = 'block';
+                        });
+                    });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Success Modal -->
+    <div class="modal fade" id="registrationSuccessModal" tabindex="-1" aria-labelledby="registrationSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registrationSuccessModalLabel">Registro Exitoso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="registrationSuccessMessage">
+                    <!-- Message will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Action Confirmation Modal -->
+    <div class="modal fade" id="actionConfirmationModal" tabindex="-1" aria-labelledby="actionConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionConfirmationModalLabel">Confirmación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="actionConfirmationModalBody">
+                    <!-- Message will be inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="actionConfirmationPrimaryBtn">Continuar</button>
+                    <button type="button" class="btn btn-secondary" id="actionConfirmationSecondaryBtn">Agregar Nuevo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-lg-start text-white" style="background-color: #132b55;">
+      <!-- Section: Social media -->
+      <section class="d-flex justify-content-center justify-content-lg-between p-4 border-bottom">
+        <!-- Left -->
+        <div class="me-5 d-none d-lg-block">
+          <span>Nuestra empresa la mejor Opción para turismo</span>
+        </div>
+        <!-- Left -->
+
+        <!-- Right -->
+        <div>
+          <a href="" class="me-4 text-reset">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="" class="me-4 text-reset">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="" class="me-4 text-reset">
+            <i class="fab fa-google"></i>
+          </a>
+          <a href="" class="me-4 text-reset">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="" class="me-4 text-reset">
+            <i class="fab fa-linkedin"></i>
+          </a>
+          <a href="" class="me-4 text-reset">
+            <i class="fab fa-github"></i>
+          </a>
+        </div>
+        <!-- Right -->
+      </section>
+
+      <!-- Section: Links -->
+      <section class="">
+        <div class="container text-center text-md-start mt-5">
+          <!-- Grid row -->
+          <div class="row mt-3">
+            <!-- Grid column -->
+            <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+              <!-- Content -->
+              <h6 class="text-uppercase fw-bold mb-4">
+                <i class="fas fa-gem me-3"></i>Omnivia
+              </h6>
+              <p>
+              ¡Descubre la aventura, vive la naturaleza! El turismo de especias te espera con aromas y paisajes únicos. ¡Explora, siente, disfruta!
+              </p>
+            </div>
+
+            <!-- Grid column -->
+            <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+              <!-- Links -->
+              <h6 class="text-uppercase fw-bold mb-4">
+                Nuestros Productos
+              </h6>
+              <p>
+                <a href="#!" class="text-reset">Destinos</a>
+              </p>
+              <p>
+                <a href="#!" class="text-reset">Atractivos</a>
+              </p>
+              <p>
+                <a href="#!" class="text-reset">Paquetes</a>
+              </p>
+            </div>
+
+            <!-- Grid column -->
+            <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+              <!-- Links -->
+              <h6 class="text-uppercase fw-bold mb-4">
+                Otros enlaces
+              </h6>
+              <p>
+                <a href="#!" class="text-reset" target="_blank">Otros destinos</a>
+              </p>
+              <p>
+                <a href="https://www.unwto.org/es" class="text-reset" target="_blank">OMT</a>
+              </p>
+              <p>
+                <a href="https://anato.org/" class="text-reset" target="_blank">ANATO</a>
+              </p>
+              <p>
+                <a href="https://www.mincit.gov.co/inicio" class="text-reset" target="_blank">MinCIT</a>
+              </p>
+               <p>
+                <a href="https://sedeelectronica.sic.gov.co/" class="text-reset" target="_blank">SIC</a>
+              </p>
+              <p>
+                <a href="https://www.supertransporte.gov.co/" class="text-reset"target="_blank">Supertransporte</a>
+              </p>
+              <p>
+                <a href="#!" class="text-reset" target="_blank">Help</a>
+              </p>
+            </div>
+
+            <!-- Grid column -->
+            <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+              <!-- Links -->
+              <h6 class="text-uppercase fw-bold mb-4">Contacto</h6>
+              <p><i class="fas fa-home me-3"></i>Carrera 25 # 17-45 Manizales, Colombia</p>
+              <p>
+                <i class="fas fa-envelope me-3"></i>
+                info@gotravelling.com
+              </p>
+              <p><i class="fas fa-phone me-3"></i> + 01 234 567 88</p>
+              <p><i class="fas fa-print me-3"></i> + 01 234 567 89</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Copyright -->
+      <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+        © 2025 Copyright: <i></i>
+        <a class="text-reset fw-bold" href="https://mdbootstrap.com/" target="_blank" >GoTravelling.com</a>
+      </div>
+    </footer>
+</body>
+</html>

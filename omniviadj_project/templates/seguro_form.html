@@ -1,0 +1,9 @@
+{% extends 'form_base.html' %}
+
+{% block form_title %}{% if object %}Editar Seguro{% else %}Crear Seguro{% endif %}{% endblock %}
+
+{% block form_heading %}{% if object %}Editar Seguro{% else %}Crear Nuevo Seguro{% endif %}{% endblock %}
+
+{% block delete_url %}{% url 'seguro-delete' pk=object.pk %}{% endblock %}
+
+{% block object_type %}seguro{% endblock %}

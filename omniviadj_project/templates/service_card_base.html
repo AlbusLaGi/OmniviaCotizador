@@ -1,0 +1,17 @@
+<div class="col-md-6 col-lg-4 mb-3">
+    <div class="card h-100">
+        <div class="card-body">
+            <h5 class="card-title">{{ title }}</h5>
+            {% for field in fields %}
+            <p class="card-text">{{ field }}</p>
+            {% endfor %}
+        </div>
+        <div class="card-footer">
+            <a href="{{ edit_url }}" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="{{ delete_url }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Está seguro de que desea eliminar este {{ object_type }}?')">Eliminar</a>
+            {% if show_details %}
+            <a href="#" class="btn btn-sm btn-outline-info" onclick="selectDestino({{ object_id }}); return false;">Ver</a>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,379 @@
+{% extends 'form_base.html' %}
+{% load static %}
+
+{% block form_title %}{% if object %}Editar Servicio de Alimentación{% else %}Crear Servicio de Alimentación{% endif %}{% endblock %}
+
+{% block form_heading %}{% if object %}Editar Servicio de Alimentación{% else %}Crear Nuevo Servicio de Alimentación{% endif %}{% endblock %}
+
+{% block delete_url %}{% url 'alimentacion-delete' pk=object.pk %}{% endblock %}
+
+{% block object_type %}servicio de alimentación{% endblock %}
+
+{% block form_fields %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
+                    {{ form.nombre }}
+                    {% if form.nombre.help_text %}
+                        <div class="form-text">{{ form.nombre.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.nombre.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.precio.id_for_label }}" class="form-label">{{ form.precio.label }}</label>
+                    {{ form.precio }}
+                    {% if form.precio.help_text %}
+                        <div class="form-text">{{ form.precio.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.precio.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="{{ form.descripcion.id_for_label }}" class="form-label">{{ form.descripcion.label }}</label>
+            {{ form.descripcion }}
+            {% if form.descripcion.help_text %}
+                <div class="form-text">{{ form.descripcion.help_text }}</div>
+            {% endif %}
+            {% for error in form.descripcion.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        
+        <!-- Tipo de Comida/Servicio con selección múltiple -->
+        <div class="mb-3">
+            <label for="{{ form.meal_type.id_for_label }}" class="form-label">{{ form.meal_type.label }}</label>
+            {{ form.meal_type }}
+            {% if form.meal_type.help_text %}
+                <div class="form-text">{{ form.meal_type.help_text }}</div>
+            {% endif %}
+            {% for error in form.meal_type.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        
+        <!-- Tipo de Plan y Cocina con selección múltiple -->
+        <div class="mb-3">
+            <label for="{{ form.servicios_tipo.id_for_label }}" class="form-label">{{ form.servicios_tipo.label }}</label>
+            {{ form.servicios_tipo }}
+            {% if form.servicios_tipo.help_text %}
+                <div class="form-text">{{ form.servicios_tipo.help_text }}</div>
+            {% endif %}
+            {% for error in form.servicios_tipo.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Opciones Dietéticas -->
+                <div class="mb-3">
+                    <label for="{{ form.dietary_options.id_for_label }}" class="form-label">{{ form.dietary_options.label }}</label>
+                    {{ form.dietary_options }}
+                    {% if form.dietary_options.help_text %}
+                        <div class="form-text">{{ form.dietary_options.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.dietary_options.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <!-- Otros campos -->
+                <div class="mb-3">
+                    <label for="{{ form.other_dietary_options.id_for_label }}" class="form-label">{{ form.other_dietary_options.label }}</label>
+                    {{ form.other_dietary_options }}
+                    {% if form.other_dietary_options.help_text %}
+                        <div class="form-text">{{ form.other_dietary_options.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.other_dietary_options.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
+                    {{ form.image }}
+                    {% if form.image.help_text %}
+                        <div class="form-text">{{ form.image.help_text }}</div>
+                    {% endif %}
+                    {% for error in form.image.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Precios organizados por temporada y capacidad -->
+        <h4 class="mt-4">Precios por Temporada</h4>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="{{ form.price_per_person_alta.id_for_label }}" class="form-label">Precio por Persona - Temporada Alta</label>
+                        {{ form.price_per_person_alta }}
+                        {% if form.price_per_person_alta.help_text %}
+                            <div class="form-text">{{ form.price_per_person_alta.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_per_person_alta.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_per_person_media.id_for_label }}" class="form-label">Precio por Persona - Temporada Media</label>
+                        {{ form.price_per_person_media }}
+                        {% if form.price_per_person_media.help_text %}
+                            <div class="form-text">{{ form.price_per_person_media.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_per_person_media.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_per_person_baja.id_for_label }}" class="form-label">Precio por Persona - Temporada Baja</label>
+                        {{ form.price_per_person_baja }}
+                        {% if form.price_per_person_baja.help_text %}
+                            <div class="form-text">{{ form.price_per_person_baja.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_per_person_baja.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <h5 class="mt-4">5-10 personas</h5>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_5_10_alta.id_for_label }}" class="form-label">Temporada Alta</label>
+                        {{ form.price_group_5_10_alta }}
+                        {% if form.price_group_5_10_alta.help_text %}
+                            <div class="form-text">{{ form.price_group_5_10_alta.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_5_10_alta.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_5_10_media.id_for_label }}" class="form-label">Temporada Media</label>
+                        {{ form.price_group_5_10_media }}
+                        {% if form.price_group_5_10_media.help_text %}
+                            <div class="form-text">{{ form.price_group_5_10_media.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_5_10_media.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_5_10_baja.id_for_label }}" class="form-label">Temporada Baja</label>
+                        {{ form.price_group_5_10_baja }}
+                        {% if form.price_group_5_10_baja.help_text %}
+                            <div class="form-text">{{ form.price_group_5_10_baja.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_5_10_baja.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <h5 class="mt-4">11-20 personas</h5>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_11_20_alta.id_for_label }}" class="form-label">Temporada Alta</label>
+                        {{ form.price_group_11_20_alta }}
+                        {% if form.price_group_11_20_alta.help_text %}
+                            <div class="form-text">{{ form.price_group_11_20_alta.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_11_20_alta.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_11_20_media.id_for_label }}" class="form-label">Temporada Media</label>
+                        {{ form.price_group_11_20_media }}
+                        {% if form.price_group_11_20_media.help_text %}
+                            <div class="form-text">{{ form.price_group_11_20_media.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_11_20_media.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_11_20_baja.id_for_label }}" class="form-label">Temporada Baja</label>
+                        {{ form.price_group_11_20_baja }}
+                        {% if form.price_group_11_20_baja.help_text %}
+                            <div class="form-text">{{ form.price_group_11_20_baja.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_11_20_baja.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <h5 class="mt-4">21-30 personas</h5>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_21_30_alta.id_for_label }}" class="form-label">Temporada Alta</label>
+                        {{ form.price_group_21_30_alta }}
+                        {% if form.price_group_21_30_alta.help_text %}
+                            <div class="form-text">{{ form.price_group_21_30_alta.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_21_30_alta.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_21_30_media.id_for_label }}" class="form-label">Temporada Media</label>
+                        {{ form.price_group_21_30_media }}
+                        {% if form.price_group_21_30_media.help_text %}
+                            <div class="form-text">{{ form.price_group_21_30_media.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_21_30_media.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_21_30_baja.id_for_label }}" class="form-label">Temporada Baja</label>
+                        {{ form.price_group_21_30_baja }}
+                        {% if form.price_group_21_30_baja.help_text %}
+                            <div class="form-text">{{ form.price_group_21_30_baja.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_21_30_baja.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <h5 class="mt-4">31-50 personas</h5>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_31_50_alta.id_for_label }}" class="form-label">Temporada Alta</label>
+                        {{ form.price_group_31_50_alta }}
+                        {% if form.price_group_31_50_alta.help_text %}
+                            <div class="form-text">{{ form.price_group_31_50_alta.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_31_50_alta.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_31_50_media.id_for_label }}" class="form-label">Temporada Media</label>
+                        {{ form.price_group_31_50_media }}
+                        {% if form.price_group_31_50_media.help_text %}
+                            <div class="form-text">{{ form.price_group_31_50_media.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_31_50_media.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_31_50_baja.id_for_label }}" class="form-label">Temporada Baja</label>
+                        {{ form.price_group_31_50_baja }}
+                        {% if form.price_group_31_50_baja.help_text %}
+                            <div class="form-text">{{ form.price_group_31_50_baja.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_31_50_baja.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <h5 class="mt-4">+50 personas</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_50_plus_alta.id_for_label }}" class="form-label">Temporada Alta</label>
+                        {{ form.price_group_50_plus_alta }}
+                        {% if form.price_group_50_plus_alta.help_text %}
+                            <div class="form-text">{{ form.price_group_50_plus_alta.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_50_plus_alta.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_50_plus_media.id_for_label }}" class="form-label">Temporada Media</label>
+                        {{ form.price_group_50_plus_media }}
+                        {% if form.price_group_50_plus_media.help_text %}
+                            <div class="form-text">{{ form.price_group_50_plus_media.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_50_plus_media.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.price_group_50_plus_baja.id_for_label }}" class="form-label">Temporada Baja</label>
+                        {{ form.price_group_50_plus_baja }}
+                        {% if form.price_group_50_plus_baja.help_text %}
+                            <div class="form-text">{{ form.price_group_50_plus_baja.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.price_group_50_plus_baja.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Fondo específico para el formulario de servicios de alimentación */
+    .card.shadow-lg {
+        background-image: url('{% static "images/rest_background.webp" %}');
+        background-size: cover;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgba(255, 255, 255, 0.7);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Logic for dynamic fields if needed (e.g., 'Otro' options)
+        const dietaryOptionsCheckboxes = document.querySelectorAll('input[name="dietary_options"]');
+        const otherDietaryOptionsWrapper = document.getElementById('div_id_other_dietary_options'); // Assuming div_id_other_dietary_options is the ID of the div wrapping other_dietary_options
+
+        if (dietaryOptionsCheckboxes.length > 0 && otherDietaryOptionsWrapper) {
+            function toggleOtherDietaryOptions() {
+                let otherSelected = false;
+                dietaryOptionsCheckboxes.forEach(checkbox => {
+                    if (checkbox.value === 'Otro' && checkbox.checked) {
+                        otherSelected = true;
+                    }
+                });
+                if (otherSelected) {
+                    otherDietaryOptionsWrapper.style.display = 'block';
+                } else {
+                    otherDietaryOptionsWrapper.style.display = 'none';
+                }
+            }
+            dietaryOptionsCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', toggleOtherDietaryOptions);
+            });
+            toggleOtherDietaryOptions(); // Set initial state
+        }
+    });
+</script>
+{% endblock %}

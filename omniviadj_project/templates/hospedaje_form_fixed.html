@@ -1,0 +1,515 @@
+﻿{% extends 'form_base.html' %}
+{% load static %}
+
+{% block form_title %}{% if object %}Editar Hospedaje{% else %}Crear Hospedaje{% endif %}{% endblock %}
+
+{% block form_heading %}{% if object %}Editar Hospedaje{% else %}Crear Nuevo Hospedaje{% endif %}{% endblock %}
+
+{% block delete_url %}{% url 'hospedaje-delete' pk=object.pk %}{% endblock %}
+
+{% block object_type %}hospedaje{% endblock %}
+
+{% block form_fields %}
+    {% csrf_token %}
+
+    <!-- Nombre del hospedaje -->
+    <div class="mb-3">
+        <label for="id_nombre_hospedaje" class="form-label">{{ form.nombre_hospedaje.label }}</label>
+        {{ form.nombre_hospedaje }}
+        {% if form.nombre_hospedaje.help_text %}
+            <div class="form-text">{{ form.nombre_hospedaje.help_text }}</div>
+        {% endif %}
+        {% for error in form.nombre_hospedaje.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Campos de ubicaciÃ³n -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="id_pais" class="form-label">{{ form.pais.label }}</label>
+            {{ form.pais }}
+            {% for error in form.pais.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="id_departamento" class="form-label">{{ form.departamento.label }}</label>
+            {{ form.departamento }}
+            {% for error in form.departamento.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="id_municipio" class="form-label">{{ form.municipio.label }}</label>
+            {{ form.municipio }}
+            {% for error in form.municipio.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- UbicaciÃ³n detallada -->
+    <div class="mb-3">
+        <label for="id_ubicacion" class="form-label">{{ form.ubicacion.label }}</label>
+        {{ form.ubicacion }}
+        <small class="form-field-note">
+            Ej: 5.057486, -75.506671. Puedes usar <a href="https://www.google.com/maps" target="_blank">Google Maps</a> para obtener las coordenadas. <a href="https://youtu.be/42Ep1ASExJ4?si=O3IwUkiAQCzKiWhe" target="_blank">'tutorial aqui'</a>
+        </small>
+        {% for error in form.ubicacion.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Capacidad y habitaciones -->
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="id_capacidadpax" class="form-label">{{ form.capacidadpax.label }}</label>
+            {{ form.capacidadpax }}
+            {% for error in form.capacidadpax.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="id_habitaciones" class="form-label">{{ form.habitaciones.label }}</label>
+            {{ form.habitaciones }}
+            {% for error in form.habitaciones.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- CalificaciÃ³n con estrellas -->
+    <div class="mb-3">
+        <label class="form-label">CalificaciÃ³n</label>
+        <div class="star-rating">
+            <div class="stars-container">
+                <span class="star" data-value="1">â˜†</span>
+                <span class="star" data-value="2">â˜†</span>
+                <span class="star" data-value="3">â˜†</span>
+                <span class="star" data-value="4">â˜†</span>
+                <span class="star" data-value="5">â˜†</span>
+            </div>
+            <input type="hidden" id="id_calificacion" name="calificacion" value="{{ form.instance.calificacion|default:0 }}">
+            <span id="rating-text" class="ms-2">({{ form.instance.calificacion|default:0 }}/5)</span>
+        </div>
+        {% for error in form.calificacion.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Tipos de hospedaje (checkboxes) -->
+    <hr>
+    <div class="mb-3">
+        <h5>Tipo de Hospedaje</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check">
+                    {{ form.hoteles }}
+                    <label class="form-check-label" for="{{ form.hoteles.id_for_label }}">{{ form.hoteles.label|default:"Hotel" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.hostales }}
+                    <label class="form-check-label" for="{{ form.hostales.id_for_label }}">{{ form.hostales.label|default:"Hostal" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.apartamentos }}
+                    <label class="form-check-label" for="{{ form.apartamentos.id_for_label }}">{{ form.apartamentos.label|default:"Apartamento" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.casas }}
+                    <label class="form-check-label" for="{{ form.casas.id_for_label }}">{{ form.casas.label|default:"Casa" }}</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    {{ form.cabaÃ±as }}
+                    <label class="form-check-label" for="{{ form.cabaÃ±as.id_for_label }}">{{ form.cabaÃ±as.label|default:"CabaÃ±a" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.fincas }}
+                    <label class="form-check-label" for="{{ form.fincas.id_for_label }}">{{ form.fincas.label|default:"Finca" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.glamping }}
+                    <label class="form-check-label" for="{{ form.glamping.id_for_label }}">{{ form.glamping.label|default:"Glamping" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.picnic }}
+                    <label class="form-check-label" for="{{ form.picnic.id_for_label }}">{{ form.picnic.label|default:"Picnic" }}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instalaciones y Servicios -->
+    <hr>
+    <div class="mb-3">
+        <h5>Instalaciones y Servicios</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-check">
+                    {{ form.restaurante }}
+                    <label class="form-check-label" for="{{ form.restaurante.id_for_label }}">{{ form.restaurante.label|default:"Restaurante" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonawifi }}
+                    <label class="form-check-label" for="{{ form.zonawifi.id_for_label }}">{{ form.zonawifi.label|default:"Zona WiFi" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.piscina }}
+                    <label class="form-check-label" for="{{ form.piscina.id_for_label }}">{{ form.piscina.label|default:"Piscina" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonaDeFumadores }}
+                    <label class="form-check-label" for="{{ form.zonaDeFumadores.id_for_label }}">{{ form.zonaDeFumadores.label|default:"Zona de Fumadores" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.petFriendly }}
+                    <label class="form-check-label" for="{{ form.petFriendly.id_for_label }}">{{ form.petFriendly.label|default:"Pet Friendly" }}</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    {{ form.bar }}
+                    <label class="form-check-label" for="{{ form.bar.id_for_label }}">{{ form.bar.label|default:"Bar" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.spa }}
+                    <label class="form-check-label" for="{{ form.spa.id_for_label }}">{{ form.spa.label|default:"Spa" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.recreacionInfantil }}
+                    <label class="form-check-label" for="{{ form.recreacionInfantil.id_for_label }}">{{ form.recreacionInfantil.label|default:"RecreaciÃ³n Infantil" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonasverdes }}
+                    <label class="form-check-label" for="{{ form.zonasverdes.id_for_label }}">{{ form.zonasverdes.label|default:"Zonas Verdes" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonaCamping }}
+                    <label class="form-check-label" for="{{ form.zonaCamping.id_for_label }}">{{ form.zonaCamping.label|default:"Zona Camping" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.zonaGlamping }}
+                    <label class="form-check-label" for="{{ form.zonaGlamping.id_for_label }}">{{ form.zonaGlamping.label|default:"Zona Glamping" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.gimnasio }}
+                    <label class="form-check-label" for="{{ form.gimnasio.id_for_label }}">{{ form.gimnasio.label|default:"Gimnasio" }}</label>
+                </div>
+                <div class="form-check">
+                    {{ form.coworking }}
+                    <label class="form-check-label" for="{{ form.coworking.id_for_label }}">{{ form.coworking.label|default:"Coworking" }}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- InformaciÃ³n de habitaciones y precios -->
+    <hr>
+    <div class="mb-3">
+        <h5>InformaciÃ³n de Habitaciones y Precios</h5>
+        <small class="form-field-note">
+            Gestione aquÃ­ la informaciÃ³n de diferentes tipos de habitaciones y sus precios por temporada (Alta, Media, Baja).
+            Cada habitaciÃ³n puede tener precios diferentes segÃºn la temporada.
+        </small>
+        <div id="habitaciones-container" class="mt-3">
+            <!-- AquÃ­ se insertarÃ¡n dinÃ¡micamente las habitaciones y precios -->
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-habitacion-btn">
+            <i class="fas fa-plus"></i> Agregar Tipo de HabitaciÃ³n
+        </button>
+        {{ form.habitaciones_info.as_hidden }}
+        {% for error in form.habitaciones_info.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+        // Sistema de calificaciÃ³n con estrellas
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funcionalidad de cascada para ubicaciÃ³n
+            const paisSelect = document.getElementById('id_pais');
+            const departamentoSelect = document.getElementById('id_departamento');
+            const municipioSelect = document.getElementById('id_municipio');
+
+            // Definir departamentos y municipios de Colombia (una lista simplificada)
+            const departamentosMunicipios = {
+                'Amazonas': ['Leticia', 'Puerto NariÃ±o'],
+                'Antioquia': ['MedellÃ­n', 'Bello', 'ItagÃ¼Ã­', 'Envigado', 'Rionegro', 'Caldas', 'Sabaneta', 'Girardota', 'Copacabana'],
+                'Arauca': ['Arauca'],
+                'AtlÃ¡ntico': ['Barranquilla', 'Soledad', 'Malambo', 'Sabanalarga'],
+                'BolÃ­var': ['Cartagena', 'MaganguÃ©', 'Carmen de BolÃ­var', 'Arjona'],
+                'BoyacÃ¡': ['Tunja', 'Duitama', 'Sogamoso', 'ChiquinquirÃ¡'],
+                'Caldas': ['Manizales', 'VillamarÃ­a', 'ChinchinÃ¡', 'La Dorada'],
+                'CaquetÃ¡': ['Florencia', 'San Vicente del CaguÃ¡n', 'Morelia', 'MilÃ¡n'],
+                'Casanare': ['Yopal', 'Aguazul', 'ChÃ¡meza', 'ManÃ­'],
+                'Cauca': ['PopayÃ¡n', 'Santander de Quilichao', 'CajibÃ­o', 'El Tambo'],
+                'Cesar': ['Valledupar', 'Aguachica', 'Gamarra', 'Pueblo Bello'],
+                'ChocÃ³': ['QuibdÃ³', 'Condoto', 'Riosucio', 'Istmina'],
+                'CÃ³rdoba': ['MonterÃ­a', 'CeretÃ©', 'Planeta Rica', 'Tierralta'],
+                'Cundinamarca': ['BogotÃ¡', 'Soacha', 'ChÃ­a', 'FacatativÃ¡', 'Funza'],
+                'GuainÃ­a': ['InÃ­rida'],
+                'Guaviare': ['San JosÃ© del Guaviare'],
+                'Huila': ['Neiva', 'Pitalito', 'GarzÃ³n', 'La Plata'],
+                'La Guajira': ['Riohacha', 'Uribia', 'Maicao', 'Fonseca'],
+                'Magdalena': ['Santa Marta', 'CiÃ©naga', 'Barranquilla', 'Aracataca'],
+                'Meta': ['Villavicencio', 'Granada', 'AcacÃ­as', 'Puerto LÃ³pez'],
+                'NariÃ±o': ['Pasto', 'Tumaco', 'Ipiales', 'TÃºquerres'],
+                'Norte de Santander': ['CÃºcuta', 'Pamplona', 'OcaÃ±a', 'Villa del Rosario'],
+                'Putumayo': ['Mocoa', 'ColÃ³n', 'Orito', 'Valle del Guamuez'],
+                'QuindÃ­o': ['Armenia', 'CalarcÃ¡', 'Circasia', 'Montenegro'],
+                'Risaralda': ['Pereira', 'Dosquebradas', 'Santa Rosa de Cabal', 'ApÃ­a'],
+                'San AndrÃ©s y Providencia': ['San AndrÃ©s'],
+                'Santander': ['Bucaramanga', 'Floridablanca', 'GirÃ³n', 'Piedecuesta'],
+                'Sucre': ['Sincelejo', 'Corozal', 'SampuÃ©s', 'Tolu'],
+                'Tolima': ['IbaguÃ©', 'Espinal', 'Mariquita', 'Chaparral'],
+                'Valle del Cauca': ['Cali', 'Palmira', 'Buenaventura', 'TuluÃ¡'],
+                'VaupÃ©s': ['MitÃº'],
+                'Vichada': ['Puerto CarreÃ±o']
+            };
+
+            // FunciÃ³n para llenar los departamentos
+            function populateDepartamentos() {
+                if (!departamentoSelect) return;
+                // Limpiar departamentos y municipios
+                departamentoSelect.innerHTML = '<option value="">Selecciona un departamento</option>';
+                municipioSelect.innerHTML = '<option value="">Selecciona un municipio</option>';
+
+                // Si el paÃ­s es Colombia, cargar departamentos
+                if (paisSelect.value === 'Colombia') {
+                    for (const dept in departamentosMunicipios) {
+                        const option = document.createElement('option');
+                        option.value = dept;
+                        option.textContent = dept;
+                        departamentoSelect.appendChild(option);
+                    }
+                }
+            }
+
+            // FunciÃ³n para llenar los municipios
+            function populateMunicipios() {
+                if (!municipioSelect) return;
+                // Limpiar municipios
+                municipioSelect.innerHTML = '<option value="">Selecciona un municipio</option>';
+
+                // Si hay un departamento seleccionado, cargar sus municipios
+                if (departamentoSelect.value) {
+                    const municipios = departamentosMunicipios[departamentoSelect.value];
+                    if (municipios) {
+                        municipios.forEach(municipio => {
+                            const option = document.createElement('option');
+                            option.value = municipio;
+                            option.textContent = municipio;
+                            municipioSelect.appendChild(option);
+                        });
+                    }
+                }
+            }
+
+            // Evento para cuando cambia el paÃ­s
+            if (paisSelect) {
+                paisSelect.addEventListener('change', function() {
+                    populateDepartamentos();
+                });
+            }
+
+            // Evento para cuando cambia el departamento
+            if (departamentoSelect) {
+                departamentoSelect.addEventListener('change', function() {
+                    populateMunicipios();
+                });
+            }
+
+            // Sistema de calificaciÃ³n con estrellas
+            const stars = document.querySelectorAll('.star');
+            const ratingInput = document.getElementById('id_calificacion');
+            const ratingText = document.getElementById('rating-text');
+
+            // Cargar la calificaciÃ³n inicial
+            const initialRating = parseFloat(ratingInput.value) || 0;
+            updateStars(initialRating);
+
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = parseFloat(this.getAttribute('data-value'));
+                    ratingInput.value = value;
+                    updateStars(value);
+                    ratingText.textContent = `(${value}/5)`;
+                });
+
+                star.addEventListener('mouseover', function() {
+                    const value = parseFloat(this.getAttribute('data-value'));
+                    highlightStars(value);
+                });
+
+                star.addEventListener('mouseout', function() {
+                    const currentRating = parseFloat(ratingInput.value) || 0;
+                    updateStars(currentRating);
+                });
+            });
+
+            function updateStars(rating) {
+                stars.forEach(star => {
+                    const starValue = parseFloat(star.getAttribute('data-value'));
+                    if (starValue <= rating) {
+                        star.textContent = 'â˜…';
+                        star.style.color = '#ffc107';
+                    } else {
+                        star.textContent = 'â˜†';
+                        star.style.color = '#ccc';
+                    }
+                });
+            }
+
+            function highlightStars(rating) {
+                stars.forEach(star => {
+                    const starValue = parseFloat(star.getAttribute('data-value'));
+                    if (starValue <= rating) {
+                        star.textContent = 'â˜…';
+                        star.style.color = '#ffdd40';
+                    } else {
+                        star.textContent = 'â˜†';
+                        star.style.color = '#ccc';
+                    }
+                });
+            }
+
+            // Funcionalidad para agregar tipos de habitaciÃ³n
+            const addHabitacionBtn = document.getElementById('add-habitacion-btn');
+            const habitacionesContainer = document.getElementById('habitaciones-container');
+
+            addHabitacionBtn.addEventListener('click', function() {
+                const habitacionIndex = habitacionesContainer.children.length;
+                const habitacionHtml = `
+                    <div class="habitacion-card mb-3 p-3 border rounded" data-index="${habitacionIndex}">
+                        <h6>Tipo de HabitaciÃ³n #${habitacionIndex + 1}</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre del Tipo</label>
+                                <input type="text" class="form-control habitacion-nombre" placeholder="Ej: Individual, Doble, Suite, etc.">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Capacidad (pax)</label>
+                                <input type="number" class="form-control habitacion-capacidad" min="1">
+                            </div>
+                        </div>
+
+                        <h6 class="mt-3">Precios por Temporada</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Temporada Alta</label>
+                                <input type="number" class="form-control precio-alta" step="0.01" min="0" placeholder="Precio">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Temporada Media</label>
+                                <input type="number" class="form-control precio-media" step="0.01" min="0" placeholder="Precio">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Temporada Baja</label>
+                                <input type="number" class="form-control precio-baja" step="0.01" min="0" placeholder="Precio">
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-danger remove-habitacion">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+
+                habitacionesContainer.insertAdjacentHTML('beforeend', habitacionHtml);
+
+                // Agregar evento para eliminar la habitaciÃ³n
+                const removeBtn = habitacionesContainer.lastElementChild.querySelector('.remove-habitacion');
+                removeBtn.addEventListener('click', function() {
+                    this.closest('.habitacion-card').remove();
+                    updateHabitacionesInfo();
+                });
+            });
+
+            // Actualizar informaciÃ³n de habitaciones cada vez que cambie
+            habitacionesContainer.addEventListener('input', function(e) {
+                if (e.target.classList.contains('habitacion-nombre') ||
+                    e.target.classList.contains('habitacion-capacidad') ||
+                    e.target.classList.contains('precio-alta') ||
+                    e.target.classList.contains('precio-media') ||
+                    e.target.classList.contains('precio-baja')) {
+                    updateHabitacionesInfo();
+                }
+            });
+
+            function updateHabitacionesInfo() {
+                const habitaciones = [];
+                const habitacionCards = document.querySelectorAll('.habitacion-card');
+
+                habitacionCards.forEach(card => {
+                    const nombre = card.querySelector('.habitacion-nombre').value;
+                    const capacidad = card.querySelector('.habitacion-capacidad').value;
+                    const precioAlta = card.querySelector('.precio-alta').value;
+                    const precioMedia = card.querySelector('.precio-media').value;
+                    const precioBaja = card.querySelector('.precio-baja').value;
+
+                    if (nombre || capacidad || precioAlta || precioMedia || precioBaja) {
+                        habitaciones.push({
+                            nombre: nombre,
+                            capacidad: capacidad ? parseInt(capacidad) : null,
+                            precios: {
+                                alta: precioAlta ? parseFloat(precioAlta) : 0,
+                                media: precioMedia ? parseFloat(precioMedia) : 0,
+                                baja: precioBaja ? parseFloat(precioBaja) : 0
+                            }
+                        });
+                    }
+                });
+
+                document.getElementById('id_habitaciones_info').value = JSON.stringify(habitaciones);
+            }
+
+            // Cargar datos existentes si estamos editando
+            const existingHabitaciones = {{ form.instance.habitaciones_info_data|default:"[]"|safe }};
+            if (existingHabitaciones.length > 0) {
+                existingHabitaciones.forEach((habitacion, index) => {
+                    addHabitacionBtn.click(); // Agregar una nueva tarjeta
+                    const card = habitacionesContainer.lastElementChild;
+
+                    card.querySelector('.habitacion-nombre').value = habitacion.nombre || '';
+                    if (habitacion.capacidad) {
+                        card.querySelector('.habitacion-capacidad').value = habitacion.capacidad;
+                    }
+
+                    if (habitacion.precios) {
+                        card.querySelector('.precio-alta').value = habitacion.precios.alta || '';
+                        card.querySelector('.precio-media').value = habitacion.precios.media || '';
+                        card.querySelector('.precio-baja').value = habitacion.precios.baja || '';
+                    }
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .star-rating {
+            display: inline-block;
+        }
+
+        .stars-container {
+            display: inline-block;
+        }
+
+        .star {
+            font-size: 2em;
+            margin: 0 2px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .habitacion-card {
+            background-color: #f8f9fa;
+        }
+    </style>
+{% endblock %}', 'Angostura', 'Caramanta', 'SampuÃ©s', 'Argelia', 'San Cayetano', 'DonmatÃ­as', 'San Francisco', 'Barbosa', 'GÃ³mez Plata', 'Caldas', 'La Estrella', 'Sabaneta', 'Bello', 'Copacabana', 'Girardota', 'ItagÃ¼Ã­', 'Envigado', 'Sabanalarga', 'Caucasia', 'TarazÃ¡', 'Zaragoza', 'San Roque', 'YolombÃ³', 'Cisneros', 'San Carlos', 'San Luis

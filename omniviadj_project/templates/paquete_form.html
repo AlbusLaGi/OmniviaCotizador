@@ -1,0 +1,664 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if object %}Editar Paquete{% else %}Crear Paquete{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="container mt-5">
+        <h2>{% if object %}Editar Paquete{% else %}Crear Nuevo Paquete{% endif %}</h2>
+
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_nombre" class="form-label">Nombre del Paquete:</label>
+            <input type="text" name="nombre" id="id_nombre" class="form-control" required value="{% if object %}{{ object.nombre }}{% endif %}">
+        </div>
+        <div class="mb-3">
+            <label for="id_descripcion" class="form-label">Descripción:</label>
+            <textarea name="descripcion" id="id_descripcion" class="form-control" rows="3" placeholder="Visita los destinos más atractivos...">{% if object %}{{ object.descripcion }}{% endif %}</textarea>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label for="id_destino_select" class="form-label">Destinos:</label>
+                <select name="destino" id="id_destino_select" class="form-select">
+                    <option value="">---------</option>
+                    {% for destino in destinos_all %}
+                    <option value="{{ destino.id }}"
+                            {% if object and destino in object.destinos.all %}selected{% endif %}>
+                        {{ destino.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button type="button" class="btn btn-primary me-2" onclick="agregarDestino()">Añadir</button>
+                <button type="button" class="btn btn-secondary" onclick="editarDestino()">Editar</button>
+            </div>
+        </div>
+
+        <!-- Lista de destinos seleccionados -->
+        <div class="mt-4" id="destinos-seleccionados">
+            <h5>Destinos del Paquete:</h5>
+            <div id="lista-destinos" class="row">
+                <!-- Destinos se agregarán aquí dinámicamente como tarjetas -->
+                {% if object %}
+                    {% for destino in object.destinos.all %}
+                    <div class="col-md-6 col-lg-4 mb-3" id="tarjeta-destino-{{ destino.id }}">
+                        <div class="card h-100 destino-card">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ destino.nombre }}</h5>
+                                {% if destino.imagenes and destino.imagenes|length > 0 %}
+                                    <img src="{{ destino.imagenes|first }}" alt="Imagen del destino" class="img-fluid mb-2" style="max-height: 100px; object-fit: cover;">
+                                {% endif %}
+                                <p class="card-text">{{ destino.descripcion|default:"Sin descripción"|truncatewords:15 }}</p>
+                                <small class="text-muted">{{ destino.ubicacion|default:"Ubicación no disponible" }}</small>
+                                {% if destino.ubicacion %}
+                                    <a href="https://www.google.com/maps/search/?api=1&query={{ destino.ubicacion|urlencode }}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">Ver ubicación</a>
+                                {% endif %}
+                                <div class="mt-auto">
+                                    <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="editarDestinoIndividual({{ destino.id }}); return false;">Editar</a>
+                                    <a href="#" class="btn btn-sm btn-outline-danger me-1" onclick="eliminarDestinoDelFormulario({{ destino.id }}); return false;">Eliminar</a>
+                                    <a href="#" class="btn btn-sm btn-outline-info" onclick="selectDestino({{ destino.id }}); return false;">Ver</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sección de Atractivos -->
+        <div class="mt-4" id="atractivos-seccion" style="display: none;">
+            <h5>Atractivos Relacionados:</h5>
+            <div id="atractivos-contenido">
+                <!-- Atractivos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Sección de Asignación de Atractivos a Visita/Entrada -->
+        <div class="mt-4" id="asignacion-atractivos-seccion" style="display: none;">
+            <h5>Asignación de Atractivos:</h5>
+            <div id="asignacion-atractivos-contenido">
+                <p class="text-muted">Seleccione los atractivos y asigne cada uno a "Visita" o "Entrada"</p>
+            </div>
+        </div>
+
+        <!-- Desglose por Temporada -->
+        <div class="mt-4">
+            <h5><span id="precio-total-text">${% if object %}Precio total por Temporada: Alta: ${{ object.precio_temporada_alta|floatformat:2 }} | Media: ${{ object.precio_temporada_media|floatformat:2 }} | Baja: ${{ object.precio_temporada_baja|floatformat:2 }}{% else %}Precio total por Temporada: Alta: $0.00 | Media: $0.00 | Baja: $0.00{% endif %}</span></h5>
+        </div>
+    </div>
+
+    <script>
+    let destinosSeleccionados = [];
+    let atractivosSeleccionados = [];
+
+    // Inicializar destinos seleccionados si estamos en modo de edición
+    {% if object %}
+        // Convertir los destinos del paquete en el array destinosSeleccionados
+        destinosSeleccionados = [
+            {% for destino in object.destinos.all %}
+            {
+                id: {{ destino.id }},
+                nombre: "{{ destino.nombre|escapejs }}",
+                ubicacion: "{{ destino.ubicacion|escapejs }}",
+                descripcion: "{{ destino.descripcion|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+        
+        // Actualizar la UI con los destinos cargados
+        actualizarListaDestinos();
+    {% endif %}
+
+    function agregarDestino() {
+        const select = document.getElementById('id_destino_select');
+        const destinoId = select.value;
+
+        if (!destinoId) {
+            alert('Por favor selecciona un destino.');
+            return;
+        }
+
+        // Verificar si se seleccionó la opción "otros" para agregar otro destino
+        if (destinoId === 'otros') {
+            // Redirigir al formulario de creación de destino
+            window.open('/destinos/nuevo/', '_blank');
+            return;
+        }
+
+        // Verificar que no esté ya agregado
+        if (destinosSeleccionados.some(d => d.id == destinoId)) {
+            alert('Este destino ya ha sido agregado.');
+            return;
+        }
+
+        // Obtener detalles del destino seleccionado para mostrarlo
+        fetch(`/api/destinos/${destinoId}/`)
+            .then(response => response.json())
+            .then(destino => {
+                destinosSeleccionados.push({
+                    id: destino.id,
+                    nombre: destino.nombre,
+                    ubicacion: destino.ubicacion,
+                    descripcion: destino.descripcion
+                });
+
+                mostrarDestino(destino.id, destino.nombre);
+                // Asegurarnos de que la sección de atractivos esté visible antes de cargarlos
+                document.getElementById('atractivos-seccion').style.display = 'block';
+                cargarAtractivos(destino.id);
+                calcularPrecioTotal();
+            })
+            .catch(error => {
+                console.error('Error al obtener detalles del destino:', error);
+                alert('Error al intentar agregar el destino.');
+            });
+
+        // Resetear el select
+        select.value = '';
+    }
+
+    function editarDestino() {
+        const select = document.getElementById('id_destino_select');
+        const destinoId = select.value;
+
+        if (!destinoId) {
+            alert('Por favor selecciona un destino para editar.');
+            return;
+        }
+
+        // Abrir página de edición del destino en nueva pestaña
+        window.open(`/destino/${destinoId}/editar/`, '_blank');
+    }
+
+    function editarDestinoIndividual(destinoId) {
+        // Abrir un modal con el formulario de edición del destino
+        fetch(`/api/destino/${destinoId}/editar/`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.text())
+            .then(html => {
+                // Crear un modal para mostrar el formulario de edición
+                const modal = document.createElement('div');
+                modal.className = 'modal fade';
+                modal.id = 'editarDestinoIndividualModal';
+                modal.tabIndex = '-1';
+                modal.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Editar Destino</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${html}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                // Mostrar el modal
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+
+                // Remover el modal del DOM cuando se cierra
+                modal.addEventListener('hidden.bs.modal', function () {
+                    document.body.removeChild(modal);
+                });
+            })
+            .catch(error => {
+                console.error('Error al cargar el formulario de edición:', error);
+                alert('Error al intentar editar el destino.');
+            });
+    }
+
+    function mostrarDestino(destinoId, nombre) {
+        const listaDestinos = document.getElementById('lista-destinos');
+        const destinoDiv = document.createElement('div');
+        destinoDiv.className = 'col-md-6 col-lg-4 mb-3';
+        destinoDiv.id = `tarjeta-destino-${destinoId}`;
+        destinoDiv.innerHTML = `
+            <div class="card h-100 destino-card">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">${nombre}</h5>
+                    <p class="card-text">Cargando información...</p>
+                    <small class="text-muted">Ubicación: Cargando...</small>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="editarDestinoIndividual(${destinoId}); return false;">Editar</a>
+                        <a href="#" class="btn btn-sm btn-outline-danger me-1" onclick="eliminarDestinoDelFormulario(${destinoId}); return false;">Eliminar</a>
+                        <a href="#" class="btn btn-sm btn-outline-info" onclick="selectDestino(${destinoId}); return false;">Ver</a>
+                    </div>
+                </div>
+            </div>
+        `;
+        listaDestinos.appendChild(destinoDiv);
+
+        // Cargar información completa del destino desde la API
+        fetch(`/api/destinos/${destinoId}/`)
+            .then(response => response.json())
+            .then(destino => {
+                if (destino) {
+                    let imagenHtml = '';
+                    if (destino.imagenes && destino.imagenes.length > 0) {
+                        imagenHtml = `<img src="${destino.imagenes[0]}" alt="Imagen del destino" class="img-fluid mb-2" style="max-height: 100px; object-fit: cover;">`;
+                    }
+
+                    const destinoCardBody = destinoDiv.querySelector('.card-body');
+                    destinoCardBody.innerHTML = `
+                        <h5 class="card-title">${destino.nombre || nombre}</h5>
+                        ${imagenHtml}
+                        <p class="card-text">${destino.descripcion || 'Sin descripción'}</p>
+                        <small class="text-muted">${destino.ubicacion || 'Ubicación no disponible'}</small>
+                        ${destino.ubicacion ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destino.ubicacion)}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">Ver ubicación</a>` : ''}
+                        <div class="mt-auto">
+                            <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="editarDestinoIndividual(${destinoId}); return false;">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger me-1" onclick="eliminarDestinoDelFormulario(${destinoId}); return false;">Eliminar</a>
+                            <a href="#" class="btn btn-sm btn-outline-info" onclick="selectDestino(${destinoId}); return false;">Ver</a>
+                        </div>
+                    `;
+                } else {
+                    // Si no se encuentra en la API de destinos, usar solo los datos básicos
+                    const destinoCardBody = destinoDiv.querySelector('.card-body');
+                    destinoCardBody.innerHTML = `
+                        <h5 class="card-title">${nombre}</h5>
+                        <p class="card-text">Información disponible al guardar</p>
+                        <small class="text-muted">Ubicación: N/A</small>
+                        <div class="mt-auto">
+                            <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="editarDestinoIndividual(${destinoId}); return false;">Editar</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger me-1" onclick="eliminarDestinoDelFormulario(${destinoId}); return false;">Eliminar</a>
+                            <a href="#" class="btn btn-sm btn-outline-info" onclick="selectDestino(${destinoId}); return false;">Ver</a>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar información del destino:', error);
+                // Si falla, usar la estructura general
+                const destinoCardBody = destinoDiv.querySelector('.card-body');
+                destinoCardBody.innerHTML = `
+                    <h5 class="card-title">${nombre}</h5>
+                    <p class="card-text">Error al cargar información</p>
+                    <small class="text-muted">Ubicación: N/A</small>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="editarDestinoIndividual(${destinoId}); return false;">Editar</a>
+                        <a href="#" class="btn btn-sm btn-outline-danger me-1" onclick="eliminarDestinoDelFormulario(${destinoId}); return false;">Eliminar</a>
+                        <a href="#" class="btn btn-sm btn-outline-info" onclick="selectDestino(${destinoId}); return false;">Ver</a>
+                    </div>
+                `;
+            });
+    }
+
+    function eliminarDestinoDelFormulario(destinoId) {
+        destinosSeleccionados = destinosSeleccionados.filter(d => d.id != destinoId);
+
+        // Eliminar atractivos relacionados
+        atractivosSeleccionados = atractivosSeleccionados.filter(atractivo =>
+            atractivo.destinoId != destinoId
+        );
+
+        // Remover el elemento del DOM
+        const destinoElement = document.getElementById(`tarjeta-destino-${destinoId}`);
+        if (destinoElement) {
+            destinoElement.remove();
+        }
+
+        // Remover atractivos del DOM
+        const atractivosDestino = document.querySelectorAll(`[data-destino-id="${destinoId}"]`);
+        atractivosDestino.forEach(element => element.remove());
+
+        calcularPrecioTotal();
+    }
+
+    function cargarAtractivos(destinoId) {
+        document.getElementById('atractivos-seccion').style.display = 'block';
+        document.getElementById('asignacion-atractivos-seccion').style.display = 'block';
+
+        fetch(`/api/destinos/${destinoId}/`)
+            .then(response => response.json())
+            .then(destino => {
+                const atractivosContenido = document.getElementById('atractivos-contenido');
+
+                // Verificar que existan actividades y que sean un array
+                if (destino.actividades && Array.isArray(destino.actividades) && destino.actividades.length > 0) {
+                    // Verificar si ya existe una sección para este destino
+                    let destinoSection = document.getElementById(`atractivos-destino-${destinoId}`);
+
+                    if (!destinoSection) {
+                        // Si no existe, crear una nueva sección
+                        destinoSection = document.createElement('div');
+                        destinoSection.className = 'mb-4';
+                        destinoSection.setAttribute('data-destino-id', destinoId);
+                        destinoSection.id = `atractivos-destino-${destinoId}`;
+                        destinoSection.setAttribute('data-destino-id', destinoId);
+                        atractivosContenido.appendChild(destinoSection);
+                    }
+
+                    // Agregar encabezado con checkbox para seleccionar/deseleccionar todos
+                    let atractivosHtml = `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">${destino.nombre}:</h6>
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                onclick="seleccionarTodosAtractivos(${destinoId}, true)">Seleccionar Todos</button>
+                        </div>
+                    `;
+
+                    destino.actividades.forEach((atractivo, index) => {
+                        // Asegurar que el objeto actividad tenga las propiedades necesarias
+                        const nombreAtractivo = typeof atractivo === 'object' && atractivo !== null
+                            ? (atractivo.atractivo_nombre || atractivo.nombre || `Atractivo ${index + 1}`)
+                            : `Atractivo ${index + 1}`;
+
+                        const checkboxId = `atractivo-${destinoId}-${index}`;
+
+                        // Manejar la posibilidad de que no existan precios o la estructura sea diferente
+                        let preciosInfo = "";
+                        if (typeof atractivo === 'object' && atractivo !== null) {
+                            if (atractivo.precios && Array.isArray(atractivo.precios) && atractivo.precios.length > 0) {
+                                const precios = atractivo.precios[0];
+                                const precioAlta = precios?.temporada_alta || 0;
+                                const precioMedia = precios?.temporada_media || 0;
+                                const precioBaja = precios?.temporada_baja || 0;
+
+                                preciosInfo = `
+                                    <div class="row ms-4 mt-1">
+                                        <div class="col-md-12">
+                                            <small class="text-muted">
+                                                T. Alta: $${precioAlta} |
+                                                T. Media: $${precioMedia} |
+                                                T. Baja: $${precioBaja}
+                                            </small>
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                preciosInfo = `
+                                    <div class="row ms-4 mt-1">
+                                        <div class="col-md-12">
+                                            <small class="text-muted fst-italic">
+                                                Precios no disponibles
+                                            </small>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
+
+                        // Verificar si ya existe un checkbox para este atractivo para no duplicarlo
+                        const existingCheckbox = destinoSection.querySelector(`#${checkboxId}`);
+                        if (!existingCheckbox) {
+                            atractivosHtml += `
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="${destinoId}-${index}" id="${checkboxId}"
+                                        onchange="actualizarAtractivo(${destinoId}, ${index}, this.checked)"
+                                        data-destino-id="${destinoId}"
+                                        data-actividad-idx="${index}">
+                                    <label class="form-check-label fw-bold" for="${checkboxId}">
+                                        ${nombreAtractivo}
+                                    </label>
+                                    ${preciosInfo}
+                                </div>
+                            `;
+                        }
+                    });
+
+                    destinoSection.innerHTML = atractivosHtml;
+
+                    // Agregar la funcionalidad para asignar atractivos a "Visita" o "Entrada"
+                    crearCamposAsignacion(destinoId, destino.actividades);
+                } else {
+                    // Mostrar mensaje si no hay actividades
+                    console.log(`El destino ${destino.nombre} no tiene actividades registradas`);
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar atractivos:', error);
+                // Mostrar mensaje de error en la consola
+                document.getElementById('atractivos-seccion').style.display = 'none';
+            });
+    }
+
+    // Función para crear campos de asignación de atractivos a "Visita" o "Entrada"
+    function crearCamposAsignacion(destinoId, actividades) {
+        const asignacionContenido = document.getElementById('asignacion-atractivos-contenido');
+
+        // Crear una sección para este destino si no existe
+        let destinoAsignacionSection = document.getElementById(`asignacion-destino-${destinoId}`);
+        if (!destinoAsignacionSection) {
+            destinoAsignacionSection = document.createElement('div');
+            destinoAsignacionSection.className = 'mb-4';
+            destinoAsignacionSection.id = `asignacion-destino-${destinoId}`;
+            destinoAsignacionSection.setAttribute('data-destino-id', destinoId);
+            destinoAsignacionSection.innerHTML = `<h6>Destino: ${document.querySelector(`[data-destino-id="${destinoId}"] h6`).textContent.replace(':','')}</h6>`;
+            asignacionContenido.appendChild(destinoAsignacionSection);
+        }
+
+        // Crear formulario para asignar cada atractivo
+        let asignacionHtml = '';
+        actividades.forEach((actividad, index) => {
+            const nombreAtractivo = typeof actividad === 'object' && actividad !== null
+                ? (actividad.atractivo_nombre || actividad.nombre || `Atractivo ${index + 1}`)
+                : `Atractivo ${index + 1}`;
+
+            const selectId = `asignacion-${destinoId}-${index}`;
+            asignacionHtml += `
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <label for="${selectId}" class="form-label">${nombreAtractivo}</label>
+                    </div>
+                    <div class="col-md-6">
+                        <select id="${selectId}" class="form-select" onchange="actualizarAsignacion(${destinoId}, ${index}, this.value)">
+                            <option value="">-- Sin asignar --</option>
+                            <option value="visita">Visita</option>
+                            <option value="entrada">Entrada</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        });
+
+        destinoAsignacionSection.innerHTML += asignacionHtml;
+    }
+
+    // Función para actualizar la asignación de un atractivo
+    function actualizarAsignacion(destinoId, actividadIdx, tipoAsignacion) {
+        // Buscar en atractivosSeleccionados si ya existe esta combinación
+        let existingIndex = atractivosSeleccionados.findIndex(
+            atr => atr.destinoId === destinoId && atr.actividadIdx === actividadIdx
+        );
+
+        if (existingIndex !== -1) {
+            // Actualizar la asignación existente
+            atractivosSeleccionados[existingIndex].tipoAsignacion = tipoAsignacion;
+        } else if (tipoAsignacion) {
+            // Solo agregar si hay una asignación válida
+            atractivosSeleccionados.push({
+                destinoId,
+                actividadIdx,
+                tipoAsignacion,
+                checked: true  // Marcado como seleccionado cuando se asigna
+            });
+        }
+
+        // Si no hay asignación, remover de la lista si existía
+        if (!tipoAsignacion && existingIndex !== -1) {
+            atractivosSeleccionados.splice(existingIndex, 1);
+        }
+
+        calcularPrecioTotal();
+    }
+
+    function actualizarAtractivo(destinoId, actividadIdx, isChecked) {
+        const existingIndex = atractivosSeleccionados.findIndex(
+            atr => atr.destinoId === destinoId && atr.actividadIdx === actividadIdx
+        );
+
+        if (isChecked) {
+            if (existingIndex === -1) {
+                atractivosSeleccionados.push({
+                    destinoId,
+                    actividadIdx,
+                    checked: true
+                });
+            }
+        } else {
+            if (existingIndex !== -1) {
+                atractivosSeleccionados.splice(existingIndex, 1);
+            }
+        }
+
+        calcularPrecioTotal();
+    }
+
+    function seleccionarTodosAtractivos(destinoId, seleccionar) {
+        const destinoSection = document.querySelector(`[data-destino-id="${destinoId}"]`);
+        if (destinoSection) {
+            const checkboxes = destinoSection.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = seleccionar;
+                // Disparar manualmente el evento onchange para actualizar el array
+                checkbox.dispatchEvent(new Event('change'));
+            });
+
+            // Cambiar el texto del botón según la acción
+            const boton = destinoSection.parentElement.querySelector('button');
+            if (boton) {
+                boton.textContent = seleccionar ? 'Deseleccionar Todos' : 'Seleccionar Todos';
+                // Cambiar la función del botón para alternar acción
+                if (seleccionar) {
+                    boton.onclick = () => seleccionarTodosAtractivos(destinoId, false);
+                } else {
+                    boton.onclick = () => seleccionarTodosAtractivos(destinoId, true);
+                }
+            }
+        }
+    }
+
+    // Asignar eventos después de cargar destinos existentes
+    {% if object %}
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar atractivos para cada destino existente
+            setTimeout(() => {
+                {% for destino in object.destinos.all %}
+                    cargarAtractivos({{ destino.id }});
+                {% endfor %}
+
+                // Esperar un poco más para que se carguen los atractivos antes de calcular el precio
+                setTimeout(() => {
+                    calcularPrecioTotal();
+                }, 1000);
+            }, 200);
+        });
+    {% endif %}
+
+    // Funcionalidad CRUD para paquetes
+    function guardarPaquete() {
+        const nombre = document.getElementById('id_nombre').value;
+        const descripcion = document.getElementById('id_descripcion').value;
+
+        if (!nombre) {
+            alert('El nombre del paquete es obligatorio.');
+            return;
+        }
+
+        // Preparar datos para guardar
+        const datosPaquete = {
+            nombre: nombre,
+            descripcion: descripcion,
+            temporada: 'Alta', // Valor por defecto, se puede actualizar según la lógica de negocio
+            destinos_ids: destinosSeleccionados.map(d => d.id),
+            atractivos_ids: atractivosSeleccionados.map(atr => ({destinoId: atr.destinoId, actividadIdx: atr.actividadIdx})),
+        };
+
+        // Enviar solicitud AJAX para guardar el paquete
+        fetch('{% if object %}{% url "paquete-update" pk=object.pk %}{% else %}{% url "paquete-crear" %}{% endif %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify(datosPaquete)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Paquete guardado exitosamente.');
+                window.location.href = '{% url "data_entry" %}';
+            } else {
+                alert('Error al guardar el paquete: ' + (data.message || 'Verifique los datos ingresados'));
+            }
+        })
+        .catch(error => {
+            console.error('Error al guardar el paquete:', error);
+            alert('Error de red: No se pudo guardar el paquete. Intente nuevamente.');
+        });
+    }
+
+    // Manejar envío del formulario
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevenir envío normal del formulario
+            guardarPaquete();
+        });
+    });
+
+    async function calcularPrecioTotal() {
+        let totalTemporadaAlta = 0;
+        let totalTemporadaMedia = 0;
+        let totalTemporadaBaja = 0;
+
+        try {
+            // Calcular precios de atractivos seleccionados y asignados (ya sea a "Visita" o "Entrada")
+            // Agrupar atractivos por destino para evitar múltiples solicitudes
+            const atractivosAgrupados = {};
+            atractivosSeleccionados.forEach(atractivo => {
+                if (atractivo.tipoAsignacion) { // Solo si está asignado a Visita o Entrada
+                    if (!atractivosAgrupados[atractivo.destinoId]) {
+                        atractivosAgrupados[atractivo.destinoId] = [];
+                    }
+                    atractivosAgrupados[atractivo.destinoId].push(atractivo);
+                }
+            });
+
+            for (const [destinoId, listaAtractivos] of Object.entries(atractivosAgrupados)) {
+                try {
+                    const response = await fetch(`/api/destinos/${destinoId}/`);
+                    if (response.ok) {
+                        const destino = await response.json();
+
+                        for (const atractivo of listaAtractivos) {
+                            if (destino.actividades && destino.actividades[atractivo.actividadIdx]) {
+                                const actividad = destino.actividades[atractivo.actividadIdx];
+                                if (actividad && actividad.precios && actividad.precios.length > 0) {
+                                    // Sumar cada temporada del atractivo por separado
+                                    const precios = actividad.precios[0];
+                                    totalTemporadaAlta += parseFloat(precios?.temporada_alta) || 0;
+                                    totalTemporadaMedia += parseFloat(precios?.temporada_media) || 0;
+                                    totalTemporadaBaja += parseFloat(precios?.temporada_baja) || 0;
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error al obtener datos del destino ${destinoId}:`, error);
+                }
+            }
+
+            // Actualizar el desglose en la pantalla
+            document.getElementById('precio-total-text').innerHTML = `Precio total por Temporada: Alta: $${totalTemporadaAlta.toFixed(2)} | Media: $${totalTemporadaMedia.toFixed(2)} | Baja: $${totalTemporadaBaja.toFixed(2)}`;
+        } catch (error) {
+            console.error('Error al calcular precios:', error);
+            // Actualizar el desglose con lo que se ha calculado hasta ahora
+            document.getElementById('precio-total-text').innerHTML = `Precio total por Temporada: Alta: $0.00 | Media: $0.00 | Baja: $0.00`;
+        }
+    }
+    </script>
+</div>
+{% endblock %}

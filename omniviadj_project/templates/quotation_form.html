@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}Cotizar{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="container my-4">
+        <h1 class="text-center mb-4">Formulario de Cotización</h1>
+
+        <form id="quotationForm">
+            {% csrf_token %}
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="origen" name="origen" placeholder="Ciudad de Origen" required>
+                        <label for="origen">Ciudad de Origen</label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="destino" name="destino" aria-label="Seleccione un Destino Turístico" required>
+                            <option value="" selected disabled>Seleccione un Destino Turístico</option>
+                            <!-- Opciones de destino se cargarán aquí dinámicamente -->
+                        </select>
+                        <label for="destino">Destino Turístico</label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                        <label for="fecha_inicio">Fecha de Inicio</label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required>
+                        <label for="fecha_fin">Fecha de Fin</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="adultos" name="adultos" min="0" value="1" required>
+                        <label for="adultos">Adultos</label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="ninios" name="ninios" min="0" value="0">
+                        <label for="ninios">Niños (2-11 años)</label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="bebes" name="bebes" min="0" value="0">
+                        <label for="bebes">Bebés (0-2 años)</label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="adultos_mayores" name="adultos_mayores" min="0" value="0">
+                        <label for="adultos_mayores">Adultos Mayores (60+ años)</label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="estudiantes" name="estudiantes" min="0" value="0">
+                        <label for="estudiantes">Estudiantes</label>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">%</span>
+                        <input type="number" class="form-control" id="porcentaje_utilidad" name="porcentaje_utilidad" min="0" max="100" step="0.01" value="0.00">
+                        <label for="porcentaje_utilidad" class="form-label">Porcentaje de Utilidad</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-12">
+                    <h4 class="mb-3">Medio de Transporte</h4>
+                    <div class="form-check form-check-inline me-3">
+                        <input class="form-check-input transporte-option" type="checkbox" id="transporte_terrestre" name="medio_transporte" value="terrestre">
+                        <label class="form-check-label" for="transporte_terrestre">Terrestre</label>
+                    </div>
+                    <div class="form-check form-check-inline me-3">
+                        <input class="form-check-input transporte-option" type="checkbox" id="transporte_aereo" name="medio_transporte" value="aereo">
+                        <label class="form-check-label" for="transporte_aereo">Aéreo</label>
+                    </div>
+                    <div class="form-check form-check-inline me-3">
+                        <input class="form-check-input transporte-option" type="checkbox" id="transporte_maritimo" name="medio_transporte" value="maritimo">
+                        <label class="form-check-label" for="transporte_maritimo">Marítimo</label>
+                    </div>
+                </div>
+            </div>
+
+            {% if entidad_tipo != 'agencia u operadora' %}
+            <div id="hospedajeOptions" class="card mt-4 fade-in" style="display: none;">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">Opciones de Hospedaje</h2>
+                </div>
+                <div class="card-body">
+                    <div id="hospedajeList" class="row">
+                        <!-- Opciones de hospedaje se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div id="otherServicesOptions" class="card mt-4 fade-in" style="display: none;">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">Otros Servicios</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if entidad_tipo != 'agencia u operadora' %}
+                        <div class="col-md-4 mb-3">
+                            <h4>Alimentación</h4>
+                            <div id="alimentacionList">
+                                <!-- Opciones de alimentación se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h4>Transporte</h4>
+                            <div id="transportList">
+                                <!-- Opciones de transporte se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-4 mb-3">
+                            <h4>Seguro</h4>
+                            <div id="seguroList">
+                                <!-- Opciones de seguro se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg fade-in" id="calculateQuoteButton">Calcular Cotización</button>
+            </div>
+        </form>
+
+        <div id="quoteResult" class="card mt-4 fade-in" style="display: none;">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Resumen de la Cotización</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Origen:</strong> <span id="resultOrigen"></span></p>
+                        <p><strong>Destino:</strong> <span id="resultDestination"></span></p>
+                        <p><strong>Fecha Inicio:</strong> <span id="resultFechaInicio"></span></p>
+                        <p><strong>Fecha Fin:</strong> <span id="resultFechaFin"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Pasajeros:</strong> <span id="resultTotalPax"></span></p>
+                        <p><strong>Desglose:</strong> <span id="resultPaxDetails"></span></p>
+                        <p><strong>Porcentaje de Utilidad:</strong> <span id="resultUtilidad"></span>%</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Precios por Pax</h4>
+                        <ul class="list-group">
+                            <li class="list-group-item">Hospedaje: $<span id="priceHospedajePax">0.00</span></li>
+                            <li class="list-group-item">Transporte: $<span id="priceTransportePax">0.00</span></li>
+                            <li class="list-group-item">Alimentación: $<span id="priceAlimentacionPax">0.00</span></li>
+                            <li class="list-group-item">Seguro: $<span id="priceSeguroPax">0.00</span></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Totales</h4>
+                        <ul class="list-group">
+                            <li class="list-group-item">Hospedaje: $<span id="totalHospedaje">0.00</span></li>
+                            <li class="list-group-item">Transporte: $<span id="totalTransporte">0.00</span></li>
+                            <li class="list-group-item">Alimentación: $<span id="totalAlimentacion">0.00</span></li>
+                            <li class="list-group-item">Seguro: $<span id="totalSeguro">0.00</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Impuestos y Utilidad</h4>
+                        <ul class="list-group">
+                            <li class="list-group-item">IVA Hospedaje (10%): $<span id="ivaHospedaje">0.00</span></li>
+                            <li class="list-group-item">IVA Otros Servicios (19%): $<span id="ivaOtros">0.00</span></li>
+                            <li class="list-group-item">Subtotal + IVA: $<span id="subtotalConIva">0.00</span></li>
+                            <li class="list-group-item">Utilidad (<span id="utilidadPorcentaje">0</span>%): $<span id="montoUtilidad">0.00</span></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="text-center">TOTAL FINAL</h4>
+                        <h2 class="text-center text-success">$<span id="totalFinal">0.00</span></h2>
+                        <h4 class="text-center">Precio por Pax: $<span id="precioPorPax">0.00</span></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    {% load static %}
+    <script src="{% static 'js/quotation.js' %}"></script>
+{% endblock %}

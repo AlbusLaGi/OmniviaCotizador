@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}{% block form_title %}{% endblock %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg p-4">
+                <h2 class="card-title text-center mb-4">{% block form_heading %}{% endblock %}</h2>
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% block form_fields %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    {% endblock %}
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">{% if object %}Actualizar{% else %}Guardar{% endif %}</button>
+                        {% block delete_button %}
+                            {% if object %}
+                            <a href="{% block delete_url %}{% endblock %}" class="btn btn-danger" onclick="return confirm('¿Está seguro de que desea eliminar este {% block object_type %}objeto{% endblock %}? Esta acción no se puede deshacer.')">Eliminar</a>
+                            {% endif %}
+                        {% endblock %}
+                        <a href="{% url 'data_entry' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

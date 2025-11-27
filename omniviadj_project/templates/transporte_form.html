@@ -1,0 +1,204 @@
+{% extends 'form_base.html' %}
+{% load static %}
+
+{% block form_title %}{% if object %}Editar Mis Vehículos{% else %}Ingresar Mis Vehículos{% endif %}{% endblock %}
+
+{% block form_heading %}{% if object %}Editar Mis Vehículos{% else %}Ingresar Mis Vehículos{% endif %}{% endblock %}
+
+{% block delete_url %}{% url 'transporte-delete' pk=object.pk %}{% endblock %}
+
+{% block object_type %}transporte{% endblock %}
+
+{% block form_fields %}
+    <div class="mb-3">
+        <label for="{{ form.tipoTransporte.id_for_label }}" class="form-label">{{ form.tipoTransporte.label }}</label>
+        {{ form.tipoTransporte }}
+        {% if form.tipoTransporte.help_text %}
+            <div class="form-text">{{ form.tipoTransporte.help_text }}</div>
+        {% endif %}
+        {% for error in form.tipoTransporte.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.modeloTransporte.id_for_label }}" class="form-label">{{ form.modeloTransporte.label }}</label>
+        {{ form.modeloTransporte }}
+        {% if form.modeloTransporte.help_text %}
+            <div class="form-text">{{ form.modeloTransporte.help_text }}</div>
+        {% endif %}
+        {% for error in form.modeloTransporte.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.marca.id_for_label }}" class="form-label">{{ form.marca.label }}</label>
+        {{ form.marca }}
+        {% if form.marca.help_text %}
+            <div class="form-text">{{ form.marca.help_text }}</div>
+        {% endif %}
+        {% for error in form.marca.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.modelo.id_for_label }}" class="form-label">{{ form.modelo.label }}</label>
+        {{ form.modelo }}
+        {% if form.modelo.help_text %}
+            <div class="form-text">{{ form.modelo.help_text }}</div>
+        {% endif %}
+        {% for error in form.modelo.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.matricula.id_for_label }}" class="form-label">{{ form.matricula.label }}</label>
+        {{ form.matricula }}
+        {% if form.matricula.help_text %}
+            <div class="form-text">{{ form.matricula.help_text }}</div>
+        {% endif %}
+        {% for error in form.matricula.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.RNT.id_for_label }}" class="form-label">{{ form.RNT.label }}</label>
+        {{ form.RNT }}
+        {% if form.RNT.help_text %}
+            <div class="form-text">{{ form.RNT.help_text }}</div>
+        {% endif %}
+        {% for error in form.RNT.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.cantidad.id_for_label }}" class="form-label">{{ form.cantidad.label }}</label>
+        {{ form.cantidad }}
+        {% if form.cantidad.help_text %}
+            <div class="form-text">{{ form.cantidad.help_text }}</div>
+        {% endif %}
+        {% for error in form.cantidad.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.pax.id_for_label }}" class="form-label">{{ form.pax.label }}</label>
+        {{ form.pax }}
+        {% if form.pax.help_text %}
+            <div class="form-text">{{ form.pax.help_text }}</div>
+        {% endif %}
+        {% for error in form.pax.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.capacidadCarga.id_for_label }}" class="form-label">{{ form.capacidadCarga.label }}</label>
+        {{ form.capacidadCarga }}
+        {% if form.capacidadCarga.help_text %}
+            <div class="form-text">{{ form.capacidadCarga.help_text }}</div>
+        {% endif %}
+        {% for error in form.capacidadCarga.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="baño" id="{{ form.baño.id_for_label }}" value="1" {% if form.baño.value %}checked{% endif %}>
+                <label class="form-check-label" for="{{ form.baño.id_for_label }}">{{ form.baño.label }}</label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="aire" id="{{ form.aire.id_for_label }}" value="1" {% if form.aire.value %}checked{% endif %}>
+                <label class="form-check-label" for="{{ form.aire.id_for_label }}">{{ form.aire.label }}</label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="sillasrecli" id="{{ form.sillasrecli.id_for_label }}" value="1" {% if form.sillasrecli.value %}checked{% endif %}>
+                <label class="form-check-label" for="{{ form.sillasrecli.id_for_label }}">{{ form.sillasrecli.label }}</label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="wifi" id="{{ form.wifi.id_for_label }}" value="1" {% if form.wifi.value %}checked{% endif %}>
+                <label class="form-check-label" for="{{ form.wifi.id_for_label }}">{{ form.wifi.label }}</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="enchufes" id="{{ form.enchufes.id_for_label }}" value="1" {% if form.enchufes.value %}checked{% endif %}>
+                <label class="form-check-label" for="{{ form.enchufes.id_for_label }}">{{ form.enchufes.label }}</label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="conexion_usb" id="{{ form.conexion_usb.id_for_label }}" value="1" {% if form.conexion_usb.value %}checked{% endif %}>
+                <label class="form-check-label" for="{{ form.conexion_usb.id_for_label }}">{{ form.conexion_usb.label }}</label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="mb-3">
+                <label for="{{ form.pantallas.id_for_label }}" class="form-label">{{ form.pantallas.label }}</label>
+                {{ form.pantallas }}
+                {% if form.pantallas.help_text %}
+                    <div class="form-text">{{ form.pantallas.help_text }}</div>
+                {% endif %}
+                {% for error in form.pantallas.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="mb-3">
+                <label for="{{ form.tipo_pantallas.id_for_label }}" class="form-label">{{ form.tipo_pantallas.label }}</label>
+                {{ form.tipo_pantallas }}
+                {% if form.tipo_pantallas.help_text %}
+                    <div class="form-text">{{ form.tipo_pantallas.help_text }}</div>
+                {% endif %}
+                {% for error in form.tipo_pantallas.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.imagen.id_for_label }}" class="form-label">{{ form.imagen.label }}</label>
+        {{ form.imagen }}
+        {% if form.imagen.help_text %}
+            <div class="form-text">{{ form.imagen.help_text }}</div>
+        {% endif %}
+        {% for error in form.imagen.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ form.imagenes_texto.id_for_label }}" class="form-label">{{ form.imagenes_texto.label }}</label>
+        {{ form.imagenes_texto }}
+        {% if form.imagenes_texto.help_text %}
+            <div class="form-text">{{ form.imagenes_texto.help_text }}</div>
+        {% endif %}
+        {% for error in form.imagenes_texto.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script src="{% static 'js/transporte_form.js' %}"></script>
+{% endblock %}

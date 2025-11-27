@@ -1,0 +1,87 @@
+{% load static %}
+
+<div class="mb-3">
+    <label for="id_nombre" class="form-label">Nombre del Paquete:</label>
+    <input type="text" name="nombre" id="id_nombre" class="form-control" required 
+           value="{% if object %}{{ object.nombre }}{% endif %}">
+</div>
+<div class="mb-3">
+    <label for="id_descripcion" class="form-label">Descripción:</label>
+    <textarea name="descripcion" id="id_descripcion" class="form-control" rows="3" placeholder="Visita los destinos más atractivos...">{% if object %}{{ object.descripcion }}{% endif %}</textarea>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <label for="id_destino_select" class="form-label">Destinos:</label>
+        <select name="destino" id="id_destino_select" class="form-select">
+            <option value="">---------</option>
+            {% for destino in destinos_all %}
+            <option value="{{ destino.id }}" 
+                    {% if object and destino in object.destinos.all %}selected{% endif %}>
+                {{ destino.nombre }}
+            </option>
+            {% endfor %}
+            <option value="otros" data-action="agregar">+ Añadir otro destino</option>
+        </select>
+    </div>
+    <div class="col-md-6 d-flex align-items-end">
+        <button type="button" class="btn btn-primary me-2" onclick="agregarDestino()">Añadir</button>
+        <button type="button" class="btn btn-secondary" onclick="editarDestino()">Editar</button>
+    </div>
+</div>
+
+<!-- Lista de destinos seleccionados -->
+<div class="mt-4" id="destinos-seleccionados">
+    <h5>Destinos del Paquete:</h5>
+    <div id="lista-destinos" class="row">
+        <!-- Destinos se agregarán aquí dinámicamente como tarjetas -->
+        {% if object %}
+            {% for destino in object.destinos.all %}
+                <div class="col-md-6 col-lg-4 mb-3" id="tarjeta-destino-{{ destino.id }}">
+                    <div class="card h-100 destino-card">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ destino.nombre }}</h5>
+                            <p class="card-text">{{ destino.descripcion|truncatechars:60 }}</p>
+                            <small class="text-muted">{{ destino.ubicacion }}</small>
+                            <div class="mt-auto">
+                                <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="editarDestinoIndividual({{ destino.id }}); return false;">Editar</a>
+                                <a href="#" class="btn btn-sm btn-outline-danger me-1" onclick="eliminarDestinoDelFormulario({{ destino.id }}); return false;">Eliminar</a>
+                                <a href="#" class="btn btn-sm btn-outline-info" onclick="selectDestino({{ destino.id }}); return false;">Ver</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- Sección de Atractivos -->
+<div class="mt-4" id="atractivos-seccion" style="display: none;">
+    <h5>Atractivos Relacionados:</h5>
+    <div id="atractivos-contenido">
+        <!-- Atractivos se cargarán aquí dinámicamente -->
+    </div>
+</div>
+
+<!-- Información adicional del Paquete -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <label for="id_temporada" class="form-label">Temporada:</label>
+        <select name="temporada" id="id_temporada" class="form-select">
+            <option value="Alta" {% if object and object.temporada == 'Alta' %}selected{% endif %}>Alta</option>
+            <option value="Media" {% if object and object.temporada == 'Media' %}selected{% endif %}>Media</option>
+            <option value="Baja" {% if object and object.temporada == 'Baja' %}selected{% endif %}>Baja</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label for="id_precio_total" class="form-label">Precio Total:</label>
+        <input type="number" name="precio_total" id="id_precio_total" class="form-control" 
+               value="{% if object %}{{ object.precio_total }}{% endif %}" readonly>
+    </div>
+</div>
+
+<!-- Precio Total -->
+<div class="mt-4">
+    <h5>Precio Total: <span id="precio-total-text">{% if object %}${{ object.precio_total|floatformat:2 }}{% else %}$0.00{% endif %}</span></h5>
+</div>

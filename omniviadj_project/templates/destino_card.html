@@ -1,0 +1,12 @@
+<div class="card h-100 destino-card">
+    <div class="card-body d-flex flex-column">
+        <h5 class="card-title">{{ destino.nombre }}</h5>
+        <p class="card-text">{{ destino.descripcion|truncatewords:20 }}</p>
+        <p class="card-text"><small class="text-muted">{{ destino.ubicacion }}</small></p>
+        <div class="mt-auto">
+            <a href="{% url 'destino-update' pk=destino.pk %}" class="btn btn-primary btn-sm me-2">Editar</a>
+            <a href="{% url 'destino-delete' pk=destino.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de que desea eliminar este destino?')">Eliminar</a>
+            <a href="#" class="btn btn-info btn-sm" onclick="selectDestino({{ destino.id }}); return false;">Ver Detalles</a>
+        </div>
+    </div>
+</div>

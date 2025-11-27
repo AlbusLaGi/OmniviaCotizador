@@ -1,0 +1,549 @@
+/* Estilos para la barra de navegación principal */
+.navbar {
+    height: 70px;
+    background: linear-gradient(90deg, #e1e1dd 0%, #132b55 100%);
+    padding: 60px 20px; /* Añadido padding para el efecto cortina */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    overflow: hidden; /* Añadido para el efecto cortina */
+}
+
+/* Estilos para la imagen del logo */
+.logo-img {
+    animation: fadeIn 1.5s ease-in-out;
+    width: 100px;
+    height: auto;
+
+}
+
+/* Animación de aparición gradual (fade in) */
+ @keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Estilos para el enlace del logo */
+.nav-logo a {
+    color: #132b55;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Estilos para el texto del logo */
+.logo-text {
+    color: #132b55;
+    font-size: 1.5rem;
+    font-weight: bold;
+     opacity: 0; /* Comienza invisible */
+    transform: translateX(-30px); /* Comienza desplazado a la izquierda (ajusta -30px si quieres más/menos desplazamiento) */
+    animation: slideInFromLeft 1s ease-out forwards; /* nombre duración timing-function fill-mode */
+    animation-delay: 1.5s; /* Retraso para que empiece después de la animación fadeIn del logo (que dura 1.5s) */
+}
+
+/* Animación de deslizamiento desde la izquierda */
+ @keyframes slideInFromLeft {
+    to { /* Estado final de la animación */
+        opacity: 1; /* Termina visible */
+        transform: translateX(0); /* Termina en su posición original */
+    }
+}
+
+/* Estilos para el contenedor de los ítems de navegación */
+.nav-items {
+    color: #e1e1dd;
+    display: flex;
+    gap: 2rem;
+}
+
+/* Estilos para cada enlace de navegación */
+.nav-link {
+    color: #e1e1dd;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    opacity: 0; /* Inicialmente invisible para la animación */
+    transform: translateY(-100%); /* Inicialmente fuera de la vista, arriba */
+    animation: curtainEffect 0.5s ease-out forwards;
+}
+
+/* Animación de cortina para cada nav-link */
+ @keyframes curtainEffect {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Retraso escalonado para el primer nav-link */
+.nav-link:nth-child(1) {
+    animation-delay: 0.2s; /* Retraso después de la animación del logo-text */
+}
+/* Retraso escalonado para el segundo nav-link */
+.nav-link:nth-child(2) {
+    animation-delay: 0.4s;
+}
+/* Retraso escalonado para el tercer nav-link */
+.nav-link:nth-child(3) {
+    animation-delay: 0.6s;
+}
+/* Retraso escalonado para el cuarto nav-link */
+.nav-link:nth-child(4) {
+    animation-delay: 0.8s;
+}
+/* Retraso escalonado para el quinto nav-link */
+.nav-link:nth-child(5) {
+    animation-delay: 1s;
+}
+
+/* Estilos para la línea decorativa debajo del nav-link */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #bb995b;
+    transition: width 0.3s ease;
+}
+
+/* Estilos para la línea decorativa al pasar el cursor sobre el nav-link */
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* Estilos para el botón de menú en móviles (inicialmente oculto) */
+.nav-toggle {
+    display: none;
+}
+
+/* Estilos para dispositivos móviles (pantallas de hasta 768px de ancho) */
+ @media\** (max-width: 768px) {
+    /* Estilos para el contenedor de ítems de navegación en móviles */
+    .nav-items {
+        position: absolute;
+        top: 70px;
+        left: 0;
+        background: linear-gradient(90deg, #00d2ff 0%, #001e47 100%);
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 0;
+        gap: 2rem;
+        transform: translateY(-150%);
+        transition: transform 0.3s ease-in-out;
+        z-index: 999;
+    }
+
+    /* Estilos para el contenedor de ítems cuando el menú móvil está abierto */
+    .nav-items.open {
+        transform: translateY(0);
+    }
+
+    /* Estilos para los nav-link dentro del menú móvil abierto (animación) */
+    .nav-items.open .nav-link {
+        opacity: 0;
+        transform: translateY(-100%);
+        animation: curtainEffect 0.3s ease-out forwards;
+    }
+
+    /* Retraso para el primer nav-link en menú móvil abierto */
+    .nav-items.open .nav-link:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+    /* Retraso para el segundo nav-link en menú móvil abierto */
+    .nav-items.open .nav-link:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    /* Retraso para el tercer nav-link en menú móvil abierto */
+    .nav-items.open .nav-link:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+    /* Retraso para el cuarto nav-link en menú móvil abierto */
+    .nav-items.open .nav-link:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+    /* Retraso para el quinto nav-link en menú móvil abierto */
+    .nav-items.open .nav-link:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    /* Estilos para el botón de menú (hamburguesa) en móviles */
+    .nav-toggle {
+        display: flex;
+        width: 30px;
+        height: 20px;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+
+    /* Estilos para las barras del icono de hamburguesa */
+    .bar {
+        width: 100%;
+        height: 2px;
+        background-color: white;
+        transition: all 0.3s ease-in-out;
+        position: relative;
+    }
+
+    /* Estilos para las barras cuando el menú está abierto (se oculta la barra central) */
+    .nav-toggle.open .bar {
+        background-color: transparent;
+    }
+
+    /* Estilos para las pseudo-elementos before y after de las barras (para crear la X) */
+    .nav-toggle .bar::before, 
+    .nav-toggle .bar::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background-color: white;
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Posición inicial de la barra superior del icono X */
+    .nav-toggle .bar::before {
+        transform: translateY(-8px);
+    }
+
+    /* Posición inicial de la barra inferior del icono X */
+    .nav-toggle .bar::after {
+        transform: translateY(8px);
+    }
+
+    /* Transformación de la barra superior a / cuando el menú está abierto */
+    .nav-toggle.open .bar::before {
+        transform: rotate(45deg);
+    }
+
+    /* Transformación de la barra inferior a \ cuando el menú está abierto */
+    .nav-toggle.open .bar::after {
+        transform: rotate(-45deg);
+    }
+}
+
+/* Ocultar elementos de navegación en la página de inicio */
+.home-page .nav-items {
+    display: none;
+}
+
+/* Estilos para el contenedor de la página de inicio */
+.home-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 100px); /* Ajustado para la altura de la barra de navegación y el pie de página */
+    text-align: center;
+}
+
+/* Estilos para la caja del logo */
+.logo-box {
+    padding: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Estilos para el logo animado */
+.animated-logo {
+    width: 250px; /* Ajusta el tamaño según sea necesario */
+    height: auto;
+    animation: scaleIn 1.5s ease-in-out;
+}
+
+/* Animación de escalado */
+ @keyframes scaleIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Estilos para la animación de aparición gradual */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInMoveUp 0.6s ease-out forwards;
+}
+
+ @keyframes fadeInMoveUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos para las tarjetas de hospedaje */
+.card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.card-title {
+    color: #343a40;
+    text-transform: none; /* Evita que el texto se convierta en mayúsculas */
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Estilo adicional para asegurar que el contenido de las tarjetas no esté en mayúsculas */
+.card h1, .card h2, .card h3, .card h4, .card h5, .card h6 {
+    text-transform: none !important;
+}
+
+.card .card-title, .card .card-text {
+    text-transform: none !important;
+}
+
+/* Estilos para el autocompletar */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    background: white;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 0.375rem;
+}
+
+.autocomplete-item {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.15s;
+}
+
+.autocomplete-item:hover, .autocomplete-item.active {
+    background-color: #e9ecef;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item strong {
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Estilos para los checkboxes y radios personalizados */
+.form-check-input {
+    margin-right: 0.5rem;
+}
+
+.form-check-label {
+    cursor: pointer;
+}
+
+/* Estilos para el botón de calcular */
+#calculateQuoteButton {
+    background-color: #28a745;
+    border-color: #28a745;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+#calculateQuoteButton:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+/* Estilos para el resumen de la cotización */
+#quoteResult .list-group-item {
+    border: none;
+    padding-left: 0;
+}
+
+#quoteResult h3 {
+    color: #007bff;
+}
+
+/* Estilos para hacer el formulario responsive */
+ @media\** (max-width: 768px) {
+    .col-md-4, .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Estilos para botones personalizados */
+
+.btn-custom {
+
+    min-width: 150px;
+
+    padding: 10px 20px;
+
+}
+
+
+
+/* Estilos para el título de la marca en la página de inicio */
+
+
+
+h1.brand-title {
+
+
+
+    color: #132b55 !important;
+
+
+
+    font-weight: bold !important;
+
+
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Un conjunto de fuentes común */
+
+
+
+    text-transform: uppercase; /* Para asegurar que sea "OMNIVIA" */
+
+
+
+}
+
+
+
+
+
+
+
+/* Estilos para el eslogan de la marca en la página de inicio */
+
+
+
+.brand-tagline {
+
+
+
+    color: #132b55 !important; /* Color azul de la marca */
+
+
+
+}
+
+
+
+
+
+
+
+/* Estilos para notas explicativas en formularios */
+
+
+
+.form-field-note {
+
+
+
+    color: #6c757d; /* Color gris estándar para texto silenciado */
+
+
+
+    font-style: italic;
+
+
+
+    font-size: 0.875em;
+
+
+
+}
+
+/* Estilos para la página de inicio con imagen de fondo */
+body.home-background {
+    background: url('../images/home_background.jpg') no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    min-height: 100vh; /* Asegura que el fondo cubra toda la altura de la ventana */
+    margin: 0; /* Elimina el margen predeterminado del body */
+    display: flex; /* Para centrar el contenido verticalmente */
+    flex-direction: column;
+}
+
+/* Asegura que el contenido de la página de inicio se centre */
+.home-page-content {
+    flex-grow: 1; /* Permite que el contenido ocupe el espacio restante */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* Estilos para el contenedor del perfil */
+.profile-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alinea al inicio verticalmente */
+    min-height: calc(100vh - 70px); /* Ajusta la altura para que no se superponga con el navbar */
+    padding-top: 20px; /* Espacio superior */
+    padding-bottom: 20px; /* Espacio inferior */
+}
+
+/* Estilos para la tarjeta del perfil */
+.profile-card {
+    width: 100%;
+    max-width: 700px; /* Ancho máximo para que sea más angosto */
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    margin-bottom: 20px; /* Espacio inferior para la tarjeta */
+}
+
+/* Efecto de vidrio opaco */
+.glass-effect {
+    background-color: rgba(255, 255, 255, 0.15); /* Fondo blanco con transparencia */
+    backdrop-filter: blur(10px); /* Desenfoque del fondo */
+    -webkit-backdrop-filter: blur(10px); /* Para compatibilidad con Safari */
+}
+
+

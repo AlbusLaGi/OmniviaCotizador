@@ -1,0 +1,7 @@
+{% extends 'confirm_delete_base.html' %}
+
+{% block title %}Confirmar Eliminación de Seguro{% endblock %}
+
+{% block object_type %}seguro{% endblock %}
+
+{% block delete_message %}¿Está seguro de que desea eliminar el seguro "<strong>{{ object.nombre }}</strong>"?{% endblock %}

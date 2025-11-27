@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bienvenido a Omnivia{% endblock %}
+
+{% block body_class %}home-page home-background{% endblock %}
+{% block extra_body_classes %}{% endblock %}
+
+{% block navbar %}
+{# This block is intentionally left empty to remove the navbar on the home page #}
+{% endblock %}
+
+{% block content %}
+<div class="home-page-content">
+    <div class="logo-box text-center my-5">
+        <img src="{% static 'images/LogoOmnivia.webp' %}" alt="Logo Omnivia" class="animated-logo"/>
+        <h1 class="display-4 mt-4 brand-title">OMNIVIA</h1>
+        <p class="lead brand-tagline">Tu plataforma para gestionar y cotizar tus viajes</p>
+
+        <div class="text-center mt-4 mb-5">
+            <button type="button" class="btn btn-primary btn-custom mx-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                Iniciar Sesión
+            </button>
+            <button type="button" class="btn btn-secondary btn-custom mx-2" data-bs-toggle="modal" data-bs-target="#registrationModal">
+                Registrarse
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
